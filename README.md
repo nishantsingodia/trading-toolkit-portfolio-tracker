@@ -8,8 +8,8 @@ A MCP server for integrating with the Upstox trading API.
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/mcp-server-upstox-api.git
-cd mcp-server-upstox-api
+git clone https://github.com/Finance-LLMs/Upstox-MCP-server-Integration.git
+cd Upstox-MCP-server-Integration
 ```
 
 2. Install dependencies:
