@@ -1,6 +1,7 @@
-# mcp-server-upstox-api
+# Upstox MCP Server
 
 A MCP server for integrating with the Upstox trading API.
+There is no official MCP server for Upstox, so this is our implementation of a MCP server for Upstox to get information from our account.
 
 ## Quick Start
 
@@ -8,8 +9,8 @@ A MCP server for integrating with the Upstox trading API.
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/Finance-LLMs/Upstox-MCP-server-Integration.git
-cd Upstox-MCP-server-Integration
+git clone https://github.com/Finance-LLMs/Upstox-MCP-Server.git
+cd Upstox-MCP-Server
 ```
 
 2. Install dependencies:
