@@ -46,7 +46,7 @@ export const getHoldingsHandler: ToolHandler<GetHoldingsArgs, Env> = async (args
   // Use token from config if not provided in args
   // const accessToken = args.accessToken || UPSTOX_CONFIG.ACCESS_TOKEN;
 
-  // const accessToken = "eyJ0eXAiOiJKV1QiLCJrZXlfaWQiOiJza192MS4wIiwiYWxnIjoiSFMyNTYifQ.eyJzdWIiOiJBSzk0NjEiLCJqdGkiOiI2ODY2ZWUzY2M5NGRmNjRkMzVhOTkxZWUiLCJpc011bHRpQ2xpZW50IjpmYWxzZSwiaXNQbHVzUGxhbiI6ZmFsc2UsImlhdCI6MTc1MTU3NjEyNCwiaXNzIjoidWRhcGktZ2F0ZXdheS1zZXJ2aWNlIiwiZXhwIjoxNzUxNTgwMDAwfQ.qDsKoZKPPR3Zg9_Xt38nnSpnpA-PAx6bYxx5pEONbl0";
+  // const accessToken = "";
   // const validatedArgs = GetHoldingsArgsSchema.parse({ accessToken });
   try {
   const response = await fetch(`${UPSTOX_API_BASE_URL}${UPSTOX_API_HOLDINGS_ENDPOINT}`, {
