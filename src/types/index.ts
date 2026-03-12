@@ -1,5 +1,3 @@
-import { z } from "zod";
-
 export interface Env {
   UPSTOX_ACCESS_TOKEN: string;
 }
@@ -31,32 +29,10 @@ export interface ToolResponse {
   isError?: boolean;
 }
 
-export interface ToolHandler<T, E={ [key: string]: unknown }> {
+export interface ToolHandler<T, E = { [key: string]: unknown }> {
   (args: T, extra: E): Promise<ToolResponse>;
 }
 
-export interface GetProfileArgs {
-  accessToken: string;
-}
-
-export interface GetFundsMarginArgs {
-  accessToken: string;
-  segment?: 'SEC' | 'COM';
-}
-
 export interface GetHoldingsArgs {
-  // accessToken: string;
+  // no args needed — token comes from env
 }
-
-export interface GetPositionsArgs {
-  accessToken: string;
-}
-
-export interface GetMtfPositionsArgs {
-  accessToken: string;
-}
-
-export interface GetOrderDetailsArgs {
-  accessToken: string;
-  orderId: string;
-} 

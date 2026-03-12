@@ -1,14 +1,13 @@
 import { z } from "zod";
-import { ToolHandler, ToolResponse } from "./types";
-import { 
-  UPSTOX_API_BASE_URL, 
+import { ToolHandler, ToolResponse, Env } from "../types";
+import {
+  UPSTOX_API_BASE_URL,
   UPSTOX_API_ORDER_HISTORY_ENDPOINT,
   HEADERS,
   ERROR_MESSAGES
 } from "../constants";
 
 export const getOrderHistorySchema = {
-  accessToken: z.string().min(1, "Access token is required"),
   orderId: z.string().optional(),
   tag: z.string().optional(),
 };
@@ -55,9 +54,9 @@ interface OrderHistoryResponse {
   data: OrderHistory[];
 }
 
-export const getOrderHistoryHandler: ToolHandler<{ accessToken: string; orderId?: string; tag?: string }> = async (
-  args: { accessToken: string; orderId?: string; tag?: string },
-  extra: { [key: string]: unknown }
+export const getOrderHistoryHandler: ToolHandler<{ orderId?: string; tag?: string }, Env> = async (
+  args: { orderId?: string; tag?: string },
+  env: Env
 ): Promise<ToolResponse> => {
   const validatedArgs = GetOrderHistoryArgsSchema.parse(args);
 
@@ -74,7 +73,7 @@ export const getOrderHistoryHandler: ToolHandler<{ accessToken: string; orderId?
     {
       headers: {
         Accept: HEADERS.ACCEPT,
-        Authorization: `Bearer ${validatedArgs.accessToken}`,
+        Authorization: `Bearer ${env.UPSTOX_ACCESS_TOKEN}`,
       },
     }
   );
@@ -91,4 +90,4 @@ export const getOrderHistoryHandler: ToolHandler<{ accessToken: string; orderId?
       text: JSON.stringify(data, null, 2)
     }]
   };
-}; 
+};

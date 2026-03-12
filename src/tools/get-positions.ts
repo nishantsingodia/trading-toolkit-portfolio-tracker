@@ -1,17 +1,13 @@
 import { z } from "zod";
-import { ToolHandler, ToolResponse, GetPositionsArgs } from "../types";
-import { 
-  UPSTOX_API_BASE_URL, 
+import { ToolHandler, ToolResponse, Env } from "../types";
+import {
+  UPSTOX_API_BASE_URL,
   UPSTOX_API_POSITIONS_ENDPOINT,
   HEADERS,
   ERROR_MESSAGES
 } from "../constants";
 
-export const getPositionsSchema = {
-  accessToken: z.string().min(1, "Access token is required"),
-};
-
-const GetPositionsArgsSchema = z.object(getPositionsSchema);
+export const getPositionsSchema = {};
 
 interface Position {
   exchange: string;
@@ -50,14 +46,12 @@ interface UpstoxPositionsResponse {
   data: Position[];
 }
 
-export const getPositionsHandler: ToolHandler<GetPositionsArgs> = async (args: GetPositionsArgs, extra: { [key: string]: unknown }): Promise<ToolResponse> => {
-  const validatedArgs = GetPositionsArgsSchema.parse(args);
-  
+export const getPositionsHandler: ToolHandler<Record<string, never>, Env> = async (args, env: Env): Promise<ToolResponse> => {
   const response = await fetch(`${UPSTOX_API_BASE_URL}${UPSTOX_API_POSITIONS_ENDPOINT}`, {
     method: "GET",
     headers: {
       "Accept": HEADERS.ACCEPT,
-      "Authorization": `Bearer ${validatedArgs.accessToken}`
+      "Authorization": `Bearer ${env.UPSTOX_ACCESS_TOKEN}`
     }
   });
 
@@ -66,11 +60,11 @@ export const getPositionsHandler: ToolHandler<GetPositionsArgs> = async (args: G
   }
 
   const data = await response.json() as UpstoxPositionsResponse;
-  
+
   return {
     content: [{
       type: "text",
       text: JSON.stringify(data, null, 2)
     }]
   };
-}; 
+};

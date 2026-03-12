@@ -1,17 +1,13 @@
 import { z } from "zod";
-import { ToolHandler, ToolResponse, GetMtfPositionsArgs } from "../types";
-import { 
-  UPSTOX_API_BASE_URL, 
+import { ToolHandler, ToolResponse, Env } from "../types";
+import {
+  UPSTOX_API_BASE_URL,
   UPSTOX_API_MTF_POSITIONS_ENDPOINT,
   HEADERS,
   ERROR_MESSAGES
 } from "../constants";
 
-export const getMtfPositionsSchema = {
-  accessToken: z.string().min(1, "Access token is required"),
-};
-
-const GetMtfPositionsArgsSchema = z.object(getMtfPositionsSchema);
+export const getMtfPositionsSchema = {};
 
 interface MtfPosition {
   exchange: string;
@@ -52,14 +48,12 @@ interface UpstoxMtfPositionsResponse {
   };
 }
 
-export const getMtfPositionsHandler: ToolHandler<GetMtfPositionsArgs> = async (args: GetMtfPositionsArgs, extra: { [key: string]: unknown }): Promise<ToolResponse> => {
-  const validatedArgs = GetMtfPositionsArgsSchema.parse(args);
-  
+export const getMtfPositionsHandler: ToolHandler<Record<string, never>, Env> = async (args, env: Env): Promise<ToolResponse> => {
   const response = await fetch(`${UPSTOX_API_BASE_URL}${UPSTOX_API_MTF_POSITIONS_ENDPOINT}`, {
     method: "GET",
     headers: {
       "Accept": HEADERS.ACCEPT,
-      "Authorization": `Bearer ${validatedArgs.accessToken}`
+      "Authorization": `Bearer ${env.UPSTOX_ACCESS_TOKEN}`
     }
   });
 
@@ -68,11 +62,11 @@ export const getMtfPositionsHandler: ToolHandler<GetMtfPositionsArgs> = async (a
   }
 
   const data = await response.json() as UpstoxMtfPositionsResponse;
-  
+
   return {
     content: [{
       type: "text",
       text: JSON.stringify(data, null, 2)
     }]
   };
-}; 
+};
