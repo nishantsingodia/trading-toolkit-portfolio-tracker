@@ -1,14 +1,13 @@
 import { z } from "zod";
-import { ToolHandler, ToolResponse } from "./types";
-import { 
-  UPSTOX_API_BASE_URL, 
+import { ToolHandler, ToolResponse, Env } from "../types";
+import {
+  UPSTOX_API_BASE_URL,
   UPSTOX_API_ORDER_DETAILS_ENDPOINT,
   HEADERS,
   ERROR_MESSAGES
 } from "../constants";
 
 export const getOrderDetailsSchema = {
-  accessToken: z.string().min(1, "Access token is required"),
   orderId: z.string().min(1, "Order ID is required"),
 };
 
@@ -49,14 +48,14 @@ interface OrderDetailsResponse {
   };
 }
 
-export const getOrderDetailsHandler: ToolHandler<{ accessToken: string; orderId: string }> = async (args: { accessToken: string; orderId: string }): Promise<ToolResponse> => {
+export const getOrderDetailsHandler: ToolHandler<{ orderId: string }, Env> = async (args: { orderId: string }, env: Env): Promise<ToolResponse> => {
   const validatedArgs = GetOrderDetailsArgsSchema.parse(args);
-  
+
   const response = await fetch(`${UPSTOX_API_BASE_URL}${UPSTOX_API_ORDER_DETAILS_ENDPOINT}?order_id=${validatedArgs.orderId}`, {
     method: "GET",
     headers: {
       "Accept": HEADERS.ACCEPT,
-      "Authorization": `Bearer ${validatedArgs.accessToken}`
+      "Authorization": `Bearer ${env.UPSTOX_ACCESS_TOKEN}`
     }
   });
 
@@ -65,11 +64,11 @@ export const getOrderDetailsHandler: ToolHandler<{ accessToken: string; orderId:
   }
 
   const data = await response.json() as OrderDetailsResponse;
-  
+
   return {
     content: [{
       type: "text",
       text: JSON.stringify(data, null, 2)
     }]
   };
-}; 
+};

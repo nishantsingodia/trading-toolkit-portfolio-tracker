@@ -1,0 +1,5 @@
+# Copy this file to .dev.vars and fill in your token
+# Run: python3 get_token.py  to generate the token
+# Redirect URI registered in Upstox: http://127.0.0.1:8000/callback
+
+UPSTOX_ACCESS_TOKEN=your_access_token_here

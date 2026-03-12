@@ -1,17 +1,13 @@
 import { z } from "zod";
-import { ToolHandler, ToolResponse, GetProfileArgs } from "../types";
-import { 
-  UPSTOX_API_BASE_URL, 
+import { ToolHandler, ToolResponse, Env } from "../types";
+import {
+  UPSTOX_API_BASE_URL,
   UPSTOX_API_PROFILE_ENDPOINT,
   HEADERS,
   ERROR_MESSAGES
 } from "../constants";
 
-export const getProfileSchema = {
-  accessToken: z.string().min(1, "Access token is required"),
-};
-
-const GetProfileArgsSchema = z.object(getProfileSchema);
+export const getProfileSchema = {};
 
 interface UpstoxProfileResponse {
   status: string;
@@ -30,14 +26,12 @@ interface UpstoxProfileResponse {
   };
 }
 
-export const getProfileHandler: ToolHandler<GetProfileArgs> = async (args: GetProfileArgs, extra: { [key: string]: unknown }): Promise<ToolResponse> => {
-  const validatedArgs = GetProfileArgsSchema.parse(args);
-  
+export const getProfileHandler: ToolHandler<Record<string, never>, Env> = async (args, env: Env): Promise<ToolResponse> => {
   const response = await fetch(`${UPSTOX_API_BASE_URL}${UPSTOX_API_PROFILE_ENDPOINT}`, {
     method: "GET",
     headers: {
       "Accept": HEADERS.ACCEPT,
-      "Authorization": `Bearer ${validatedArgs.accessToken}`
+      "Authorization": `Bearer ${env.UPSTOX_ACCESS_TOKEN}`
     }
   });
 
@@ -46,11 +40,11 @@ export const getProfileHandler: ToolHandler<GetProfileArgs> = async (args: GetPr
   }
 
   const data = await response.json() as UpstoxProfileResponse;
-  
+
   return {
     content: [{
       type: "text",
       text: JSON.stringify(data, null, 2)
     }]
   };
-}; 
+};
