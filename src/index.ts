@@ -11,7 +11,13 @@ import {
   getOrderDetailsSchema, getOrderDetailsHandler,
   getTradesSchema, getTradesHandler,
   getOrderTradesSchema, getOrderTradesHandler,
-  getOrderHistorySchema, getOrderHistoryHandler
+  getOrderHistorySchema, getOrderHistoryHandler,
+  getMarketQuotesSchema, getMarketQuotesHandler,
+  getLtpQuotesSchema, getLtpQuotesHandler,
+  getOhlcQuotesSchema, getOhlcQuotesHandler,
+  getOptionChainSchema, getOptionChainHandler,
+  getOptionContractsSchema, getOptionContractsHandler,
+  getMarketStatusSchema, getMarketStatusHandler
 } from "./tools";
 
 export class MyMCP extends McpAgent {
@@ -54,6 +60,26 @@ export class MyMCP extends McpAgent {
 		});
 		this.server.tool("get-order-history", getOrderHistorySchema, async (args) => {
 			return getOrderHistoryHandler(args as { orderId?: string; tag?: string }, this.env);
+		});
+
+		// Market Data Tools
+		this.server.tool("get-market-quotes", getMarketQuotesSchema, async (args) => {
+			return getMarketQuotesHandler(args as { instrument_keys: string }, this.env);
+		});
+		this.server.tool("get-ltp-quotes", getLtpQuotesSchema, async (args) => {
+			return getLtpQuotesHandler(args as { instrument_keys: string }, this.env);
+		});
+		this.server.tool("get-ohlc-quotes", getOhlcQuotesSchema, async (args) => {
+			return getOhlcQuotesHandler(args as { instrument_keys: string; interval: string }, this.env);
+		});
+		this.server.tool("get-option-chain", getOptionChainSchema, async (args) => {
+			return getOptionChainHandler(args as { instrument_key: string; expiry_date: string }, this.env);
+		});
+		this.server.tool("get-option-contracts", getOptionContractsSchema, async (args) => {
+			return getOptionContractsHandler(args as { instrument_key: string; expiry_date?: string }, this.env);
+		});
+		this.server.tool("get-market-status", getMarketStatusSchema, async (args) => {
+			return getMarketStatusHandler(args as { exchange: string }, this.env);
 		});
 	}
 }
