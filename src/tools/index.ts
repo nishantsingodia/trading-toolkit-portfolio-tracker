@@ -15,3 +15,8 @@ export * from "./get-ohlc-quotes";
 export * from "./get-option-chain";
 export * from "./get-option-contracts";
 export * from "./get-market-status";
+export * from "./get-historical-candles";
+export * from "./run-backtest";
+export * from "./compare-strategies";
+export * from "./optimize-strategy";
+export * from "./suggest-strategies";

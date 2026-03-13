@@ -1,0 +1,15 @@
+{
+  "name": "upstox-backtester",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.2",
+    "vitest": "^1.3.1"
+  }
+}
