@@ -17,7 +17,12 @@ import {
   getOhlcQuotesSchema, getOhlcQuotesHandler,
   getOptionChainSchema, getOptionChainHandler,
   getOptionContractsSchema, getOptionContractsHandler,
-  getMarketStatusSchema, getMarketStatusHandler
+  getMarketStatusSchema, getMarketStatusHandler,
+  getHistoricalCandlesSchema, getHistoricalCandlesHandler,
+  runBacktestSchema, runBacktestHandler,
+  compareStrategiesSchema, compareStrategiesHandler,
+  optimizeStrategySchema, optimizeStrategyHandler,
+  suggestStrategiesSchema, suggestStrategiesHandler,
 } from "./tools";
 
 export class MyMCP extends McpAgent {
@@ -80,6 +85,23 @@ export class MyMCP extends McpAgent {
 		});
 		this.server.tool("get-market-status", getMarketStatusSchema, async (args) => {
 			return getMarketStatusHandler(args as { exchange: string }, this.env);
+		});
+
+		// Backtester Tools
+		this.server.tool("get-historical-candles", getHistoricalCandlesSchema, async (args) => {
+			return getHistoricalCandlesHandler(args as { instrument_key: string; interval: string; from_date: string; to_date: string }, this.env);
+		});
+		this.server.tool("run-backtest", runBacktestSchema, async (args) => {
+			return runBacktestHandler(args as { instrument_key: string; interval: string; from_date: string; to_date: string; strategy: string; strategy_params?: string; initial_capital?: number; quantity?: number }, this.env);
+		});
+		this.server.tool("compare-strategies", compareStrategiesSchema, async (args) => {
+			return compareStrategiesHandler(args as { instrument_key: string; interval: string; from_date: string; to_date: string; strategies: string; initial_capital?: number; quantity?: number }, this.env);
+		});
+		this.server.tool("optimize-strategy", optimizeStrategySchema, async (args) => {
+			return optimizeStrategyHandler(args as { instrument_key: string; interval: string; from_date: string; to_date: string; strategy: string; param_ranges: string; optimize_for?: string; initial_capital?: number; quantity?: number }, this.env);
+		});
+		this.server.tool("suggest-strategies", suggestStrategiesSchema, async (args) => {
+			return suggestStrategiesHandler(args as { instrument_key: string; interval?: string; lookback_days?: number }, this.env);
 		});
 	}
 }

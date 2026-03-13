@@ -10,6 +10,7 @@ export const UPSTOX_API_ORDER_DETAILS_ENDPOINT = "/v2/order/details";
 export const UPSTOX_API_ORDER_TRADES_ENDPOINT = "/v2/order/trades";
 export const UPSTOX_API_ORDER_HISTORY_ENDPOINT = "/v2/order/history";
 export const UPSTOX_API_TRADES_ENDPOINT = "/v2/order/trades/get-trades-for-day";
+export const UPSTOX_API_HISTORICAL_CANDLE_ENDPOINT = "/v2/historical-candle";
 
 
 // HTTP Headers
