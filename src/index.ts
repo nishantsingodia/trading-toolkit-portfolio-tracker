@@ -23,6 +23,7 @@ import {
   compareStrategiesSchema, compareStrategiesHandler,
   optimizeStrategySchema, optimizeStrategyHandler,
   suggestStrategiesSchema, suggestStrategiesHandler,
+  runUniverseBacktestSchema, runUniverseBacktestHandler,
 } from "./tools";
 
 export class MyMCP extends McpAgent {
@@ -102,6 +103,11 @@ export class MyMCP extends McpAgent {
 		});
 		this.server.tool("suggest-strategies", suggestStrategiesSchema, async (args) => {
 			return suggestStrategiesHandler(args as { instrument_key: string; interval?: string; lookback_days?: number }, this.env);
+		});
+
+		// Universe Backtest (survivorship-bias-free)
+		this.server.tool("run-universe-backtest", runUniverseBacktestSchema, async (args) => {
+			return runUniverseBacktestHandler(args as { index: string; interval: string; from_date: string; to_date: string; strategy: string; strategy_params?: string; initial_capital?: number; quantity?: number; concurrency?: number }, this.env);
 		});
 	}
 }

@@ -41,3 +41,9 @@ export { executeBacktest } from "./commands/run-backtest.js";
 export { compareStrategies } from "./commands/compare-strategies.js";
 export { optimizeStrategy, optimizeWithCandles } from "./commands/optimize-strategy.js";
 export { suggestStrategies, suggestWithCandles } from "./commands/suggest-strategies.js";
+export { executeUniverseBacktest } from "./commands/run-universe-backtest.js";
+export type { UniverseBacktestInput, UniverseBacktestResult, StockBacktestResult } from "./commands/run-universe-backtest.js";
+
+// Index constituent data
+export { getConstituentsAsOf, getAvailableSnapshots, getAvailableIndices } from "./data/index-constituents.js";
+export type { IndexName, IndexSnapshot } from "./data/index-constituents.js";
