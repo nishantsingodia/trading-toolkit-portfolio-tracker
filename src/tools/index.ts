@@ -20,3 +20,4 @@ export * from "./run-backtest";
 export * from "./compare-strategies";
 export * from "./optimize-strategy";
 export * from "./suggest-strategies";
+export * from "./get-fno-decay";

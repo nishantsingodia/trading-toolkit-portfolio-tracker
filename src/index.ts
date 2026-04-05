@@ -23,6 +23,7 @@ import {
   compareStrategiesSchema, compareStrategiesHandler,
   optimizeStrategySchema, optimizeStrategyHandler,
   suggestStrategiesSchema, suggestStrategiesHandler,
+  getFnoDecaySchema, getFnoDecayHandler,
 } from "./tools";
 
 export class MyMCP extends McpAgent {
@@ -102,6 +103,11 @@ export class MyMCP extends McpAgent {
 		});
 		this.server.tool("suggest-strategies", suggestStrategiesSchema, async (args) => {
 			return suggestStrategiesHandler(args as { instrument_key: string; interval?: string; lookback_days?: number }, this.env);
+		});
+
+		// FnO Decay Analysis
+		this.server.tool("get-fno-decay", getFnoDecaySchema, async (args) => {
+			return getFnoDecayHandler(args as Record<string, never>, this.env);
 		});
 	}
 }
