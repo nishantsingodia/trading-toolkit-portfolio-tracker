@@ -134,6 +134,8 @@ interface DecayDetail {
   underlying: string;
   ltp: number;
   underlying_spot: number;
+  moneyness: "ITM" | "ATM" | "OTM";
+  distance_from_atm_pct: number;
   theta: number;
   theta_per_lot: number;
   daily_decay: number;
@@ -251,16 +253,36 @@ export const getFnoDecayHandler: ToolHandler<Record<string, never>, Env> = async
       expiryDate.setHours(0, 0, 0, 0);
       const dte = Math.max(0, Math.ceil((expiryDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)));
 
+      // Moneyness calculation
+      const spot = entry.underlying_spot_price;
+      const strike = parsed.strike;
+      const distancePct = Math.round(((strike - spot) / spot) * 10000) / 100; // +ve = strike above spot
+      const absDistancePct = Math.abs(distancePct);
+
+      let moneyness: "ITM" | "ATM" | "OTM";
+      if (absDistancePct <= 1) {
+        // Within 1% of spot = ATM
+        moneyness = "ATM";
+      } else if (parsed.optionType === "CE") {
+        // CE: ITM when strike < spot, OTM when strike > spot
+        moneyness = strike < spot ? "ITM" : "OTM";
+      } else {
+        // PE: ITM when strike > spot, OTM when strike < spot
+        moneyness = strike > spot ? "ITM" : "OTM";
+      }
+
       details.push({
         trading_symbol: position.trading_symbol || position.tradingsymbol,
         quantity: qty,
         net_position: qty > 0 ? "LONG" : "SHORT",
         option_type: parsed.optionType,
-        strike: parsed.strike,
+        strike,
         expiry,
         underlying: parsed.underlying,
         ltp: optionData.market_data?.ltp ?? position.last_price,
-        underlying_spot: entry.underlying_spot_price,
+        underlying_spot: spot,
+        moneyness,
+        distance_from_atm_pct: distancePct,
         theta: thetaPerShare,
         theta_per_lot: thetaPerShare * lotSize,
         daily_decay: Math.round(dailyDecay * 100) / 100,
@@ -284,16 +306,24 @@ export const getFnoDecayHandler: ToolHandler<Record<string, never>, Env> = async
     const weeklyDecay = totalDailyDecay * 7; // theta applies calendar days
     const monthlyDecay = totalDailyDecay * 30;
 
+    // Moneyness breakdown
+    const decayByMoneyness = {
+      ATM: Math.round(details.filter(d => d.moneyness === "ATM").reduce((s, d) => s + d.daily_decay, 0) * 100) / 100,
+      OTM: Math.round(details.filter(d => d.moneyness === "OTM").reduce((s, d) => s + d.daily_decay, 0) * 100) / 100,
+      ITM: Math.round(details.filter(d => d.moneyness === "ITM").reduce((s, d) => s + d.daily_decay, 0) * 100) / 100,
+    };
+
     const summary = {
       total_option_positions: details.length,
       total_daily_theta_decay: Math.round(totalDailyDecay * 100) / 100,
       decay_earned_from_shorts: Math.round(decayFromShorts * 100) / 100,
       decay_lost_from_longs: Math.round(decayFromLongs * 100) / 100,
+      decay_by_moneyness: decayByMoneyness,
       weekly_decay_estimate: Math.round(weeklyDecay * 100) / 100,
       monthly_decay_estimate: Math.round(monthlyDecay * 100) / 100,
       net_portfolio_delta: Math.round(netDelta * 100) / 100,
       net_portfolio_vega: Math.round(netVega * 100) / 100,
-      note: "Positive daily_decay = you earn from time decay (short options). Negative = you lose (long options). Theta accelerates as expiry approaches."
+      note: "Positive daily_decay = you earn from time decay (short options). Negative = you lose (long options). ATM options decay fastest. Theta accelerates as expiry approaches."
     };
 
     return {
