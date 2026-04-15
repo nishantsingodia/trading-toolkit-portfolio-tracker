@@ -124,7 +124,7 @@ export interface SupertrendParams {
 }
 
 export interface VwapCrossoverParams {
-  anchor: string; // "day" for daily reset
+  period: number; // rolling VWAP lookback for daily candles (default 20)
 }
 
 export interface RsiParams {
@@ -200,11 +200,35 @@ export interface AdxResult {
   minusDi: number[];
 }
 
+/** Zerodha equity delivery cost breakdown */
+export interface ZerodhaCosts {
+  sttPct: number;           // STT: 0.1% each side (buy + sell)
+  exchangeTxnPct: number;   // NSE txn charges: ~0.00297% each side
+  sebiPct: number;          // SEBI charges: 0.0001% each side
+  stampDutyPct: number;     // Stamp duty: 0.015% on buy side only
+  dpCharges: number;        // DP charges: ₹15.93 per sell transaction
+  gstPct: number;           // GST: 18% on (brokerage + exchange + SEBI)
+}
+
+export const ZERODHA_EQUITY_DELIVERY: ZerodhaCosts = {
+  sttPct: 0.1,
+  exchangeTxnPct: 0.00297,
+  sebiPct: 0.0001,
+  stampDutyPct: 0.015,
+  dpCharges: 15.93,
+  gstPct: 18,
+};
+
 /** Backtest configuration */
 export interface BacktestConfig {
   initialCapital: number;
   quantity: number;
   allowAccumulation: boolean;
+  slippagePct?: number;       // per-side slippage % (default 0.05 for large-cap)
+  costs?: ZerodhaCosts | null; // null = zero costs (legacy), undefined = Zerodha defaults
+  nextBarExecution?: boolean;  // true = execute at next bar open (default true)
+  stopLossPct?: number;       // optional universal stop-loss % from entry (e.g. -5)
+  maxHoldDays?: number;       // optional max holding period in days
 }
 
 /** Optimization result */

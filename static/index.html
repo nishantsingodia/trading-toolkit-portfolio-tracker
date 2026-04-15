@@ -1,0 +1,2319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Upstox Watchlist Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0d1117;
+  --surface: #161b22;
+  --surface2: #1c2333;
+  --border: #30363d;
+  --text: #e6edf3;
+  --text2: #8b949e;
+  --green: #3fb950;
+  --green-bg: rgba(63,185,80,0.15);
+  --red: #f85149;
+  --red-bg: rgba(248,81,73,0.15);
+  --yellow: #d29922;
+  --yellow-bg: rgba(210,153,34,0.15);
+  --blue: #58a6ff;
+  --blue-bg: rgba(88,166,255,0.15);
+  --purple: #bc8cff;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ─── Header ─── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.header h1 {
+  font-size: 20px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.header h1 .logo {
+  width: 28px;
+  height: 28px;
+  background: linear-gradient(135deg, var(--green), var(--blue));
+  border-radius: 6px;
+}
+.auth-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+}
+.auth-badge.valid { background: var(--green-bg); color: var(--green); }
+.auth-badge.expired { background: var(--red-bg); color: var(--red); }
+.auth-badge.loading { background: var(--yellow-bg); color: var(--yellow); }
+.auth-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.auth-badge.valid .auth-dot { background: var(--green); }
+.auth-badge.expired .auth-dot { background: var(--red); }
+.auth-badge.loading .auth-dot { background: var(--yellow); animation: pulse 1.5s infinite; }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+/* ─── Tabs ─── */
+.tabs {
+  display: flex;
+  gap: 0;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+}
+.tab {
+  padding: 12px 20px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text2);
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+}
+.tab:hover { color: var(--text); }
+.tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+
+/* ─── Content ─── */
+.content { padding: 24px; max-width: 1400px; margin: 0 auto; }
+.panel { display: none; }
+.panel.active { display: block; }
+
+/* ─── Stats Bar ─── */
+.stats-bar {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 20px;
+  min-width: 160px;
+  flex: 1;
+}
+.stat-card .label { font-size: 12px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; }
+.stat-card .value { font-size: 24px; font-weight: 700; margin-top: 4px; }
+.stat-card .value.green { color: var(--green); }
+.stat-card .value.red { color: var(--red); }
+.stat-card .value.blue { color: var(--blue); }
+
+/* ─── Table ─── */
+.table-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.table-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.table-header h3 { font-size: 15px; font-weight: 600; }
+.table-actions { display: flex; gap: 8px; align-items: center; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+th {
+  text-align: left;
+  padding: 10px 16px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text2);
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+}
+td {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(255,255,255,0.02); }
+
+/* ─── Signal Badges ─── */
+.signal {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+.signal.FRESH_BUY { background: var(--green-bg); color: var(--green); border: 1px solid rgba(63,185,80,0.3); font-weight: 700; }
+.signal.RECENT_BUY { background: var(--green-bg); color: var(--green); opacity: 0.8; }
+.signal.FRESH_SELL { background: var(--red-bg); color: var(--red); border: 1px solid rgba(248,81,73,0.3); font-weight: 700; }
+.signal.RECENT_SELL { background: var(--red-bg); color: var(--red); opacity: 0.8; }
+.signal.BULLISH { background: var(--blue-bg); color: var(--blue); }
+.signal.BEARISH { background: rgba(139,148,158,0.15); color: var(--text2); }
+.signal.NEUTRAL { background: transparent; color: var(--text2); }
+.signal.sm { padding: 2px 6px; font-size: 10px; min-width: 32px; text-align: center; }
+
+.consensus { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+.consensus.buy { background: var(--green-bg); color: var(--green); }
+.consensus.sell { background: var(--red-bg); color: var(--red); }
+.consensus.conflict { background: var(--yellow-bg); color: var(--yellow); }
+.consensus.neutral { background: rgba(139,148,158,0.15); color: var(--text2); }
+
+.expand-row td { padding: 12px 20px; background: var(--surface2); font-size: 12px; color: var(--text2); white-space: normal; overflow: hidden; }
+.expand-row .ind-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; box-sizing: border-box; }
+.expand-row .ind-item { background: var(--bg); padding: 8px 10px; border-radius: 6px; overflow: hidden; word-break: break-word; }
+.expand-row .ind-label { font-size: 10px; text-transform: uppercase; color: var(--text2); display: block; margin-bottom: 4px; }
+.expand-row .ind-value { font-size: 13px; font-weight: 600; color: var(--text); }
+
+.category-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+.category-badge.LARGECAP { background: var(--blue-bg); color: var(--blue); }
+.category-badge.MIDCAP { background: rgba(188,140,255,0.15); color: var(--purple); }
+
+.invested-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+}
+
+/* ─── Buttons ─── */
+.btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text);
+  transition: all 0.15s;
+}
+.btn:hover { border-color: var(--text2); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn.primary { background: var(--blue); border-color: var(--blue); color: #fff; }
+.btn.primary:hover { background: #4c9aed; }
+.btn.danger { background: var(--red-bg); border-color: rgba(248,81,73,0.3); color: var(--red); }
+.btn.success { background: var(--green-bg); border-color: rgba(63,185,80,0.3); color: var(--green); }
+.btn.sm { padding: 4px 10px; font-size: 12px; }
+
+.btn-icon {
+  background: none;
+  border: none;
+  color: var(--text2);
+  cursor: pointer;
+  padding: 4px;
+  font-size: 16px;
+  line-height: 1;
+}
+.btn-icon:hover { color: var(--red); }
+
+/* ─── Filter pills ─── */
+.filter-pills { display: flex; gap: 6px; }
+.pill {
+  padding: 5px 14px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text2);
+  transition: all 0.15s;
+}
+.pill.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+.pill:hover:not(.active) { border-color: var(--text2); color: var(--text); }
+
+/* ─── Forms ─── */
+.form-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.form-group label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text2);
+}
+.form-group input, .form-group select {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 13px;
+  outline: none;
+}
+.form-group input:focus, .form-group select:focus {
+  border-color: var(--blue);
+}
+
+/* ─── Loading ─── */
+.spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--border);
+  border-top-color: var(--blue);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-overlay {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 60px;
+  color: var(--text2);
+  font-size: 14px;
+}
+
+/* ─── Toast ─── */
+.toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.toast {
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  animation: slideIn 0.3s ease;
+  max-width: 400px;
+}
+.toast.success { background: var(--green-bg); color: var(--green); border: 1px solid rgba(63,185,80,0.3); }
+.toast.error { background: var(--red-bg); color: var(--red); border: 1px solid rgba(248,81,73,0.3); }
+.toast.info { background: var(--blue-bg); color: var(--blue); border: 1px solid rgba(88,166,255,0.3); }
+@keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+/* ─── Modal ─── */
+.modal-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+}
+.modal-backdrop.open { display: flex; }
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  min-width: 400px;
+  max-width: 500px;
+}
+.modal h3 { margin-bottom: 16px; font-size: 16px; }
+.modal .form-group { margin-bottom: 12px; }
+.modal .form-group input, .modal .form-group select { width: 100%; }
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; }
+
+/* ─── PnL colors ─── */
+.pnl-positive { color: var(--green); }
+.pnl-negative { color: var(--red); }
+
+/* ─── Searchable Select ─── */
+.search-select {
+  position: relative;
+}
+.search-select input {
+  width: 100%;
+}
+.search-select .dropdown {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  max-height: 240px;
+  overflow-y: auto;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 6px 6px;
+  z-index: 300;
+}
+.search-select .dropdown.open { display: block; }
+.search-select .dropdown .opt {
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.search-select .dropdown .opt:hover { background: rgba(88,166,255,0.1); }
+.search-select .dropdown .opt .cat-tag {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-weight: 600;
+}
+.search-select .dropdown .opt .cat-tag.LARGECAP { background: var(--blue-bg); color: var(--blue); }
+.search-select .dropdown .opt .cat-tag.MIDCAP { background: rgba(188,140,255,0.15); color: var(--purple); }
+.search-select .dropdown .no-results {
+  padding: 12px;
+  color: var(--text2);
+  font-size: 13px;
+  text-align: center;
+}
+
+#strategyGuide { display: none; }
+#strategyGuide.open { display: block; }
+#strategyGuide table tr:nth-child(even) { background: var(--bg); }
+#strategyGuide table th { background: var(--surface2); }
+
+/* ─── Responsive ─── */
+.table-scroll { overflow-x: auto; }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <h1>
+    <div class="logo"></div>
+    Upstox Watchlist Panel
+  </h1>
+  <div style="display:flex;align-items:center;gap:10px">
+    <div class="auth-badge loading" id="authBadge" style="cursor:pointer" onclick="reAuthenticate()" title="Click to re-authenticate">
+      <span class="auth-dot"></span>
+      <span id="authText">Checking...</span>
+    </div>
+  </div>
+</div>
+
+<!-- Tabs -->
+<div class="tabs">
+  <div class="tab active" data-tab="scanner" onclick="switchTab('scanner')">Signal Scanner</div>
+  <div class="tab" data-tab="fno" onclick="switchTab('fno')">F&O Signals</div>
+  <div class="tab" data-tab="watchlist" onclick="switchTab('watchlist')">Watchlist</div>
+  <div class="tab" data-tab="portfolio" onclick="switchTab('portfolio')">Portfolio</div>
+</div>
+
+<!-- Content -->
+<div class="content">
+
+  <!-- ════════════ Scanner Panel ════════════ -->
+  <div class="panel active" id="panel-scanner">
+    <div class="stats-bar" id="scanStats"></div>
+
+    <!-- Strategy Guide (collapsible) -->
+    <div id="strategyGuide" class="table-wrap" style="margin-bottom:16px;font-size:13px">
+      <div style="padding:16px 20px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <h3 style="font-size:15px">Strategy Guide & Decision Framework</h3>
+          <button class="btn-icon" onclick="document.getElementById('strategyGuide').classList.remove('open')" style="font-size:16px">&times;</button>
+        </div>
+
+        <table style="width:100%;font-size:11px;margin-bottom:16px">
+          <thead><tr style="text-align:left">
+            <th style="padding:5px 6px">Strategy</th>
+            <th style="padding:5px 6px">What it does</th>
+            <th style="padding:5px 6px">BUY when</th>
+            <th style="padding:5px 6px">SELL when</th>
+            <th style="padding:5px 6px">Hold</th>
+            <th style="padding:5px 6px">6/6?</th>
+            <th style="padding:5px 6px">2024-26</th>
+            <th style="padding:5px 6px">Role</th>
+          </tr></thead>
+          <tbody>
+            <tr>
+              <td style="padding:5px 6px;font-weight:600;color:var(--green)">BB+RSI</td>
+              <td style="padding:5px 6px">Mean-reversion: buys oversold dips at Bollinger lower band</td>
+              <td style="padding:5px 6px">Price &le; Lower BB AND RSI &lt; 30</td>
+              <td style="padding:5px 6px">Price &ge; Middle BB OR RSI &gt; 70</td>
+              <td style="padding:5px 6px">16d</td>
+              <td style="padding:5px 6px;color:var(--green);font-weight:600">6/6</td>
+              <td style="padding:5px 6px;color:var(--green)">100.6%</td>
+              <td style="padding:5px 6px;color:var(--green);font-weight:600">PRIMARY</td>
+            </tr>
+            <tr>
+              <td style="padding:5px 6px;font-weight:600;color:var(--green)">Stoch+RSI</td>
+              <td style="padding:5px 6px">Double oversold filter: highest-quality dip entries</td>
+              <td style="padding:5px 6px">%K(14)&lt;20 AND RSI&lt;35 AND %K crosses %D</td>
+              <td style="padding:5px 6px">%K&gt;80 AND RSI&gt;65 AND %K crosses below %D</td>
+              <td style="padding:5px 6px">101d</td>
+              <td style="padding:5px 6px;color:var(--green);font-weight:600">6/6</td>
+              <td style="padding:5px 6px">17.5%</td>
+              <td style="padding:5px 6px;color:var(--green);font-weight:600">PRIMARY</td>
+            </tr>
+            <tr>
+              <td style="padding:5px 6px;font-weight:600;color:var(--green)">RSI</td>
+              <td style="padding:5px 6px">Classic RSI reversal: simplest, most reliable</td>
+              <td style="padding:5px 6px">RSI(14) crosses above 30</td>
+              <td style="padding:5px 6px">RSI(14) crosses below 70</td>
+              <td style="padding:5px 6px">98d</td>
+              <td style="padding:5px 6px;color:var(--green);font-weight:600">6/6</td>
+              <td style="padding:5px 6px">22.7%</td>
+              <td style="padding:5px 6px;color:var(--green);font-weight:600">PRIMARY</td>
+            </tr>
+            <tr>
+              <td style="padding:5px 6px;font-weight:600;color:var(--blue)">CANSLIM</td>
+              <td style="padding:5px 6px">O'Neil volume breakout near 52W high</td>
+              <td style="padding:5px 6px">Price&gt;SMA50 AND Vol&gt;1.5x AND &le;10% of 52W high AND RSI 50-80</td>
+              <td style="padding:5px 6px">Price &lt; SMA50 OR -8% stop</td>
+              <td style="padding:5px 6px">30d</td>
+              <td style="padding:5px 6px;color:var(--blue)">5/6</td>
+              <td style="padding:5px 6px">21.1%</td>
+              <td style="padding:5px 6px;color:var(--blue);font-weight:600">PRIMARY</td>
+            </tr>
+            <tr>
+              <td style="padding:5px 6px;font-weight:600;color:var(--blue)">DualMom</td>
+              <td style="padding:5px 6px">Antonacci momentum: absolute + relative + MACD exit</td>
+              <td style="padding:5px 6px">Price&gt;SMA200 AND top 75% of 52W range AND MACD&gt;0</td>
+              <td style="padding:5px 6px">Price&lt;SMA200 OR &lt;50% range OR MACD&lt;0</td>
+              <td style="padding:5px 6px">38d</td>
+              <td style="padding:5px 6px;color:var(--blue)">5/6</td>
+              <td style="padding:5px 6px">17.1%</td>
+              <td style="padding:5px 6px;color:var(--blue);font-weight:600">PRIMARY</td>
+            </tr>
+            <tr>
+              <td style="padding:5px 6px;font-weight:600;color:var(--yellow)">SuperT</td>
+              <td style="padding:5px 6px">ATR-adaptive trend following (use in trending markets only)</td>
+              <td style="padding:5px 6px">Direction flips bullish</td>
+              <td style="padding:5px 6px">Direction flips bearish</td>
+              <td style="padding:5px 6px">44d</td>
+              <td style="padding:5px 6px;color:var(--yellow)">4/6</td>
+              <td style="padding:5px 6px;color:var(--red)">-0.7%</td>
+              <td style="padding:5px 6px;color:var(--yellow)">CONDITIONAL</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div style="background:var(--bg);border-radius:8px;padding:12px 16px;margin-bottom:12px">
+          <div style="font-weight:600;margin-bottom:8px;color:var(--blue)">How to decide when multiple signals appear:</div>
+          <div style="display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:12px">
+            <span style="color:var(--green);font-weight:600">BB+RSI + Stoch+RSI together</span>
+            <span>64.8% WR, 2.79% avg 20d return. Conviction signal — full position (Rs 25K).</span>
+            <span style="color:var(--green)">3+ strategies BUY</span>
+            <span>Very rare. Full position. Mean-rev + breakout agreeing = highest conviction.</span>
+            <span style="color:var(--blue)">Any single PRIMARY BUY</span>
+            <span>All 5 primaries are independent (0% overlap). Half position (Rs 12.5K) on any single signal.</span>
+            <span style="color:var(--yellow)">SUPERTREND alone</span>
+            <span>Conditional strategy. Only act if market is clearly trending (Nifty ADX &gt; 25).</span>
+            <span style="color:var(--red)">Mean-rev BUY + CANSLIM SELL</span>
+            <span>SKIP. Mean-rev sees oversold dip, breakout says trend is broken. Wait for alignment.</span>
+          </div>
+        </div>
+
+        <div style="background:var(--bg);border-radius:8px;padding:12px 16px">
+          <div style="font-weight:600;margin-bottom:8px;color:var(--yellow)">Exit rule: Follow your ENTRY strategy</div>
+          <div style="font-size:12px;color:var(--text2)">
+            BB+RSI entry &rarr; sell when price &ge; middle BB or RSI &gt; 70 (avg 16 days).<br>
+            Stoch+RSI entry &rarr; sell when %K &gt; 80 AND RSI &gt; 65 (avg 101 days).<br>
+            RSI entry &rarr; sell when RSI crosses below 70 (avg 98 days).<br>
+            CANSLIM entry &rarr; sell when price &lt; SMA50 or -8% stop loss (avg 30 days).<br>
+            DualMom entry &rarr; sell when price &lt; SMA200 or MACD &lt; 0 (avg 38 days).<br>
+            Supertrend entry &rarr; sell when direction flips bearish (avg 44 days).
+          </div>
+        </div>
+
+        <div style="margin-top:14px;font-weight:600;font-size:12px;margin-bottom:8px;color:var(--purple)">Active CAGR% by Market Period (Natural Exits, 458 stocks)</div>
+        <table style="width:100%;font-size:11px;margin-bottom:12px;border-collapse:collapse">
+          <thead><tr style="text-align:center">
+            <th style="padding:4px 6px;text-align:left">Strategy</th>
+            <th style="padding:4px 6px">2012-15<br><span style="font-weight:300;font-size:9px">Recovery</span></th>
+            <th style="padding:4px 6px">2015-18<br><span style="font-weight:300;font-size:9px">Bull Run</span></th>
+            <th style="padding:4px 6px">2018-20<br><span style="font-weight:300;font-size:9px">Pre-COVID</span></th>
+            <th style="padding:4px 6px">2020-22<br><span style="font-weight:300;font-size:9px">COVID Rally</span></th>
+            <th style="padding:4px 6px">2022-24<br><span style="font-weight:300;font-size:9px">Consolidation</span></th>
+            <th style="padding:4px 6px">2024-26<br><span style="font-weight:300;font-size:9px">Current</span></th>
+            <th style="padding:4px 6px">Avg</th>
+            <th style="padding:4px 6px">Hold</th>
+            <th style="padding:4px 6px">Pos</th>
+          </tr></thead>
+          <tbody style="text-align:center">
+            <tr style="background:var(--green-bg)">
+              <td style="text-align:left;padding:3px 6px;font-weight:600;color:var(--green)">BB+RSI</td>
+              <td style="padding:3px">31.0</td><td style="padding:3px;font-weight:600">95.5</td><td style="padding:3px">20.0</td>
+              <td style="padding:3px">9.4</td><td style="padding:3px;font-weight:600">77.1</td><td style="padding:3px;font-weight:600;color:var(--green)">100.6</td>
+              <td style="padding:3px;font-weight:600">55.6</td><td style="padding:3px">16d</td><td style="padding:3px;color:var(--green);font-weight:600">6/6</td>
+            </tr>
+            <tr style="background:var(--green-bg)">
+              <td style="text-align:left;padding:3px 6px;font-weight:600;color:var(--green)">Stch+RSI</td>
+              <td style="padding:3px">45.4</td><td style="padding:3px">62.2</td><td style="padding:3px">9.0</td>
+              <td style="padding:3px;font-weight:600">140.8</td><td style="padding:3px">60.5</td><td style="padding:3px">17.5</td>
+              <td style="padding:3px;font-weight:600">55.9</td><td style="padding:3px">101d</td><td style="padding:3px;color:var(--green);font-weight:600">6/6</td>
+            </tr>
+            <tr style="background:var(--green-bg)">
+              <td style="text-align:left;padding:3px 6px;font-weight:600;color:var(--green)">RSI</td>
+              <td style="padding:3px">50.0</td><td style="padding:3px">38.4</td><td style="padding:3px">14.8</td>
+              <td style="padding:3px;font-weight:600">100.1</td><td style="padding:3px">54.3</td><td style="padding:3px">22.7</td>
+              <td style="padding:3px;font-weight:600">46.7</td><td style="padding:3px">98d</td><td style="padding:3px;color:var(--green);font-weight:600">6/6</td>
+            </tr>
+            <tr style="background:var(--blue-bg)">
+              <td style="text-align:left;padding:3px 6px;font-weight:600;color:var(--blue)">CANSLIM</td>
+              <td style="padding:3px;font-weight:600">90.4</td><td style="padding:3px">48.5</td><td style="padding:3px;color:var(--red)">-12.1</td>
+              <td style="padding:3px">84.2</td><td style="padding:3px">57.8</td><td style="padding:3px">21.1</td>
+              <td style="padding:3px;font-weight:600">48.3</td><td style="padding:3px">30d</td><td style="padding:3px;color:var(--blue)">5/6</td>
+            </tr>
+            <tr style="background:var(--blue-bg)">
+              <td style="text-align:left;padding:3px 6px;font-weight:600;color:var(--blue)">DualMom</td>
+              <td style="padding:3px">29.8</td><td style="padding:3px">10.6</td><td style="padding:3px;color:var(--red)">-11.7</td>
+              <td style="padding:3px">40.5</td><td style="padding:3px">38.8</td><td style="padding:3px">17.1</td>
+              <td style="padding:3px;font-weight:600">20.9</td><td style="padding:3px">38d</td><td style="padding:3px;color:var(--blue)">5/6</td>
+            </tr>
+            <tr style="background:var(--yellow-bg)">
+              <td style="text-align:left;padding:3px 6px;font-weight:600;color:var(--yellow)">SuperT</td>
+              <td style="padding:3px">14.9</td><td style="padding:3px">7.7</td><td style="padding:3px;color:var(--red)">-8.5</td>
+              <td style="padding:3px">65.5</td><td style="padding:3px">30.0</td><td style="padding:3px;color:var(--red)">-0.7</td>
+              <td style="padding:3px">18.1</td><td style="padding:3px">44d</td><td style="padding:3px;color:var(--yellow)">4/6</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div style="background:var(--bg);border-radius:8px;padding:10px 14px;margin-top:10px;font-size:11px;line-height:1.6">
+          <div style="font-weight:600;margin-bottom:4px;color:var(--purple)">Quick Read</div>
+          <div><span style="color:var(--green);font-weight:600">BB+RSI</span> dominates 2024-26 (100.6%) and 2015-18 (95.5%) — <b>king of choppy markets</b></div>
+          <div><span style="color:var(--green);font-weight:600">Stch+RSI</span> dominates 2020-22 (140.8%) — <b>king of crash recoveries</b></div>
+          <div><span style="color:var(--green);font-weight:600">RSI</span> — never below 9% in any period, <b>most stable floor</b></div>
+          <div><span style="color:var(--blue);font-weight:600">CANSLIM</span> — highest in 2012-15 (90.4%), only fails in systemic crises (2018-20)</div>
+          <div><span style="color:var(--blue);font-weight:600">DualMom</span> — improved with MACD exit, 5/6, solid 17.1% in current market</div>
+          <div><span style="color:var(--yellow);font-weight:600">SuperT</span> — only one negative in 2024-26, keep conditional</div>
+        </div>
+
+        <div style="margin-top:8px;font-size:10px;color:var(--text2)">
+          <strong>Backtested:</strong> 14 years (2012-2026), 458 stocks, survivorship-bias-free, dynamic universe (NSE reconstitutions replayed).
+          Natural exits. Close-price execution (3:20 PM). 0% signal overlap between mean-rev and breakout strategies.
+        </div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <div class="table-header">
+        <h3>Multi-Strategy Scanner <button class="btn sm" onclick="document.getElementById('strategyGuide').classList.toggle('open')" style="font-size:11px;padding:2px 8px;margin-left:8px">? Guide</button></h3>
+        <div class="table-actions">
+          <div class="filter-pills" id="scanFilter">
+            <div class="pill active" data-filter="ALL" onclick="filterScan('ALL')">All</div>
+            <div class="pill" data-filter="LARGECAP" onclick="filterScan('LARGECAP')">Large Cap</div>
+            <div class="pill" data-filter="MIDCAP" onclick="filterScan('MIDCAP')">Mid Cap</div>
+          </div>
+          <div class="filter-pills" id="signalFilter" style="margin-left:8px">
+            <div class="pill active" data-filter="ALL" onclick="filterSignal('ALL')">All</div>
+            <div class="pill" data-filter="FRESH" onclick="filterSignal('FRESH')">Fresh Today</div>
+            <div class="pill" data-filter="BUYS" onclick="filterSignal('BUYS')">Buys</div>
+            <div class="pill" data-filter="SELLS" onclick="filterSignal('SELLS')">Sells</div>
+          </div>
+          <span id="cacheStatus" style="font-size:11px;color:var(--text2);padding:4px 8px" title="Click to refresh cache"></span>
+          <button class="btn primary" onclick="runScan()" id="scanBtn">
+            Scan Now
+          </button>
+        </div>
+      </div>
+      <div id="scanHealth" style="display:none;padding:0 12px"></div>
+      <div class="table-scroll">
+        <div id="scanBody">
+          <div class="loading-overlay">
+            Click <strong>Scan Now</strong> to fetch signals for all watchlisted stocks
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════ F&O Signals Panel ════════════ -->
+  <div class="panel" id="panel-fno">
+    <!-- Stats Bar -->
+    <div class="stats-bar" id="fnoStats"></div>
+
+    <!-- Controls -->
+    <div style="display:flex;gap:10px;margin-bottom:16px;align-items:center">
+      <div class="filter-pills" id="fnoUnderlying">
+        <button class="pill active" onclick="setFnoUnderlying('NIFTY')">NIFTY</button>
+        <button class="pill" onclick="setFnoUnderlying('BANKNIFTY')">BANKNIFTY</button>
+      </div>
+      <button class="btn primary" id="fnoScanBtn" onclick="runFnoScan()">Scan Now</button>
+      <span id="fnoLastScan" style="font-size:12px;color:var(--text2)"></span>
+    </div>
+
+    <!-- My F&O Positions (live monitoring) -->
+    <div class="table-wrap" style="margin-bottom:16px">
+      <div class="table-header">
+        <h3>My F&O Positions</h3>
+        <div class="table-actions">
+          <button class="btn sm" onclick="loadFnoPositions()">Refresh Prices</button>
+          <button class="btn sm" onclick="syncFnoFromContractNotes()">Sync Contract Notes</button>
+          <button class="btn sm success" onclick="openFnoTradeModal()">+ Add Trade</button>
+        </div>
+      </div>
+      <div class="table-scroll" id="fnoPositionsBody">
+        <div class="loading-overlay">Click Refresh to load open positions with live advice</div>
+      </div>
+    </div>
+
+    <!-- Signals Table -->
+    <div class="table-wrap" style="margin-bottom:16px">
+      <div class="table-header">
+        <h3>Active Strategy Signals</h3>
+        <div style="font-size:12px;color:var(--text2)">Based on live option chain + OI analysis</div>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Strategy</th>
+              <th>Action</th>
+              <th>Confidence</th>
+              <th>Entry</th>
+              <th>Target</th>
+              <th>SL</th>
+              <th>Exit Rule</th>
+              <th>Reason</th>
+            </tr>
+          </thead>
+          <tbody id="fnoSignals">
+            <tr><td colspan="8" class="loading-overlay"><span class="spinner"></span> Click "Scan Now" to fetch live F&O signals</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Market Context -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <!-- OI Analysis -->
+      <div class="table-wrap">
+        <div class="table-header"><h3>OI Analysis (Option Chain)</h3></div>
+        <div class="table-scroll" style="max-height:400px;overflow-y:auto">
+          <table>
+            <thead>
+              <tr><th>Strike</th><th>Call OI</th><th>Put OI</th><th>CE Price</th><th>PE Price</th><th>CE IV</th><th>PE IV</th></tr>
+            </thead>
+            <tbody id="fnoChain"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Quick Reference -->
+      <div class="table-wrap">
+        <div class="table-header"><h3>Strategy Playbook</h3></div>
+        <div style="padding:16px;font-size:13px;line-height:1.8">
+          <div style="margin-bottom:12px">
+            <div style="font-weight:600;color:var(--green);margin-bottom:4px">VIX &lt; 15 (Calm Market)</div>
+            Short Straddle, Short Strangle, Iron Condor, Deep OTM Sell
+          </div>
+          <div style="margin-bottom:12px">
+            <div style="font-weight:600;color:var(--blue);margin-bottom:4px">VIX 15-20 (Normal)</div>
+            Short Straddle, Bull/Bear Spreads
+          </div>
+          <div style="margin-bottom:12px">
+            <div style="font-weight:600;color:var(--yellow);margin-bottom:4px">VIX 20-25 (Elevated)</div>
+            Bull/Bear Spreads only, reduce position size
+          </div>
+          <div style="margin-bottom:12px">
+            <div style="font-weight:600;color:var(--red);margin-bottom:4px">VIX &gt; 25 (Fear)</div>
+            NO selling. Stay cash. Wait for calm.
+          </div>
+          <div style="border-top:1px solid var(--border);padding-top:12px;margin-top:12px;color:var(--text2)">
+            <strong style="color:var(--text)">Exit Rules (ALWAYS follow):</strong><br>
+            1. Hit target → BOOK immediately<br>
+            2. Hit SL → EXIT immediately<br>
+            3. 2 days before expiry → SQUARE OFF<br>
+            4. Daily loss > 5% capital → STOP
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════ Watchlist Panel ════════════ -->
+  <div class="panel" id="panel-watchlist">
+    <div class="stats-bar" id="wlStats"></div>
+
+    <div class="table-wrap">
+      <div class="table-header">
+        <h3>Watchlist</h3>
+        <div class="table-actions">
+          <div class="filter-pills" id="wlFilter">
+            <div class="pill active" data-filter="ALL" onclick="filterWl('ALL')">All</div>
+            <div class="pill" data-filter="LARGECAP" onclick="filterWl('LARGECAP')">Large Cap</div>
+            <div class="pill" data-filter="MIDCAP" onclick="filterWl('MIDCAP')">Mid Cap</div>
+          </div>
+          <button class="btn success" onclick="openAddModal()">+ Add Stock</button>
+        </div>
+      </div>
+      <div class="table-scroll" id="wlBody">
+        <div class="loading-overlay"><div class="spinner"></div> Loading watchlist...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════ Portfolio Panel ════════════ -->
+  <div class="panel" id="panel-portfolio">
+    <!-- Portfolio sub-tabs -->
+    <div style="display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:16px">
+      <div class="tab active" data-ptab="strategy" onclick="switchPortfolioTab('strategy')" style="padding:10px 20px;cursor:pointer;font-size:14px;font-weight:500;border-bottom:2px solid var(--blue);color:var(--blue)">Strategy</div>
+      <div class="tab" data-ptab="legacy" onclick="switchPortfolioTab('legacy')" style="padding:10px 20px;cursor:pointer;font-size:14px;font-weight:500;color:var(--text2);border-bottom:2px solid transparent">Legacy</div>
+      <div style="margin-left:auto;display:flex;gap:8px;align-items:center;padding-right:8px">
+        <button class="btn" onclick="syncTrades()" id="syncBtn">Sync Trades</button>
+        <button class="btn" onclick="autoTagStrategies()" id="autoTagBtn" title="Match legacy holdings to scanner strategies">Auto-Tag Strategies</button>
+        <button class="btn success" onclick="openTradeModal()">+ Record Trade</button>
+        <label class="btn" style="cursor:pointer"><input type="file" accept=".csv" onchange="handleCsvUpload(event)" style="display:none"> Import CSV</label>
+      </div>
+    </div>
+
+    <div class="stats-bar" id="portStats"></div>
+
+    <div class="table-wrap" style="margin-bottom: 20px;">
+      <div class="table-header">
+        <h3 id="portOpenTitle">Open Positions</h3>
+      </div>
+      <div class="table-scroll" id="portOpenBody">
+        <div class="loading-overlay"><div class="spinner"></div> Loading positions...</div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <div class="table-header">
+        <h3>Closed Positions</h3>
+      </div>
+      <div class="table-scroll" id="portClosedBody">
+        <div class="loading-overlay"><div class="spinner"></div> Loading...</div>
+      </div>
+    </div>
+
+    <div class="table-wrap" style="margin-top: 20px;">
+      <div class="table-header">
+        <h3>Trade History</h3>
+      </div>
+      <div class="table-scroll" id="tradeHistoryBody">
+        <div class="loading-overlay"><div class="spinner"></div> Loading...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Stock Modal -->
+<div class="modal-backdrop" id="addModal">
+  <div class="modal">
+    <h3>Add Stock to Watchlist</h3>
+    <div class="form-group">
+      <label>Search Stock (NIFTY 100 + MIDCAP 150)</label>
+      <div class="search-select" id="addSearchSelect">
+        <input type="text" id="addSearchInput" placeholder="Type to search..." autocomplete="off">
+        <div class="dropdown" id="addDropdown"></div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Selected</label>
+      <input type="text" id="addSelected" readonly placeholder="Select a stock above" style="opacity:0.6">
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal('addModal')">Cancel</button>
+      <button class="btn primary" id="addStockBtn" onclick="addStock()" disabled>Add to Watchlist</button>
+    </div>
+  </div>
+</div>
+
+<!-- Record Trade Modal -->
+<div class="modal-backdrop" id="tradeModal">
+  <div class="modal">
+    <h3>Record Trade</h3>
+    <div class="form-group">
+      <label>Symbol</label>
+      <select id="tradeSymbol">
+        <option value="">-- Select Stock --</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Action</label>
+      <select id="tradeAction">
+        <option value="BUY">BUY</option>
+        <option value="SELL">SELL</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Price</label>
+      <input type="number" id="tradePrice" step="0.01" placeholder="0.00">
+    </div>
+    <div class="form-group">
+      <label>Quantity</label>
+      <input type="number" id="tradeQty" step="1" placeholder="0">
+    </div>
+    <div class="form-group">
+      <label>Date (optional)</label>
+      <input type="date" id="tradeDate">
+    </div>
+    <div class="form-group">
+      <label>Broker</label>
+      <select id="tradeBroker">
+        <option value="ZERODHA">Zerodha</option>
+        <option value="SAHI">SAHI</option>
+        <option value="UPSTOX">Upstox</option>
+        <option value="MANUAL">Manual</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Portfolio</label>
+      <select id="tradePortfolio">
+        <option value="STRATEGY">Strategy (signal-based)</option>
+        <option value="LEGACY">Legacy (existing holding)</option>
+      </select>
+    </div>
+    <div class="form-group" id="tradeSignalGroup" style="display:none">
+      <label>Signal Strategy</label>
+      <select id="tradeSignalStrategy">
+        <option value="">-- Select --</option>
+        <option value="BB_RSI">BB + RSI Revert</option>
+        <option value="STOCH_RSI">Stoch + RSI Double</option>
+        <option value="RSI_OBOS">RSI Oversold/Overbought</option>
+        <option value="CANSLIM">CANSLIM Breakout</option>
+        <option value="DUAL_MOM">Dual Momentum</option>
+        <option value="SUPERTREND">Supertrend</option>
+        <option value="SUPERTREND">Supertrend</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal('tradeModal')">Cancel</button>
+      <button class="btn primary" onclick="recordTrade()">Record</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Trade Modal -->
+<div class="modal-backdrop" id="editTradeModal">
+  <div class="modal">
+    <h3>Edit Trade</h3>
+    <input type="hidden" id="editTradeId">
+    <div class="form-group">
+      <label>Symbol</label>
+      <input type="text" id="editTradeSymbol" readonly style="opacity:0.6">
+    </div>
+    <div class="form-group">
+      <label>Action</label>
+      <select id="editTradeAction">
+        <option value="BUY">BUY</option>
+        <option value="SELL">SELL</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Price</label>
+      <input type="number" id="editTradePrice" step="0.01">
+    </div>
+    <div class="form-group">
+      <label>Quantity</label>
+      <input type="number" id="editTradeQty" step="1">
+    </div>
+    <div class="form-group">
+      <label>Date</label>
+      <input type="date" id="editTradeDate">
+    </div>
+    <div class="modal-actions">
+      <button class="btn danger" onclick="deleteTrade()" style="margin-right:auto">Delete</button>
+      <button class="btn" onclick="closeModal('editTradeModal')">Cancel</button>
+      <button class="btn primary" onclick="saveEditTrade()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<!-- F&O Trade Modal (outside panels so it's always accessible) -->
+<div class="modal-backdrop" id="fnoTradeModal">
+  <div class="modal" style="min-width:500px">
+    <h3>Record F&O Trade</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="form-group">
+        <label>Underlying</label>
+        <select id="fnoUnd"><option>NIFTY</option><option>BANKNIFTY</option></select>
+      </div>
+      <div class="form-group">
+        <label>Expiry (YYYY-MM-DD)</label>
+        <input id="fnoExpiry" type="text" placeholder="2026-04-07">
+      </div>
+      <div class="form-group">
+        <label>Strike</label>
+        <input id="fnoStrike" type="number" placeholder="22700">
+      </div>
+      <div class="form-group">
+        <label>Type</label>
+        <select id="fnoType"><option>CE</option><option>PE</option></select>
+      </div>
+      <div class="form-group">
+        <label>Action</label>
+        <select id="fnoAction"><option>SELL</option><option>BUY</option></select>
+      </div>
+      <div class="form-group">
+        <label>Entry Price (₹)</label>
+        <input id="fnoPrice" type="number" step="0.1" placeholder="333">
+      </div>
+      <div class="form-group">
+        <label>Lots</label>
+        <input id="fnoLots" type="number" value="1">
+      </div>
+      <div class="form-group">
+        <label>Strategy</label>
+        <select id="fnoStrategy">
+          <option value="short_straddle">Short Straddle</option>
+          <option value="deep_otm_perleg">Deep OTM Per-Leg</option>
+          <option value="manual">Manual / Ad-hoc</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Broker</label>
+        <select id="fnoBroker"><option>UPSTOX</option><option>ZERODHA</option><option>SAHI</option><option>MANUAL</option></select>
+      </div>
+      <div class="form-group">
+        <label>Position ID (auto if blank)</label>
+        <input id="fnoPosId" type="text" placeholder="auto-generated">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeFnoTradeModal()">Cancel</button>
+      <button class="btn primary" onclick="submitFnoTrade()">Record Trade</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toasts"></div>
+
+<script>
+const API = window.location.origin;
+let scanData = null;
+let wlData = null;
+let portData = null;
+let stockMaster = [];
+let selectedAddStock = null;
+let currentScanFilter = 'ALL';
+let currentWlFilter = 'ALL';
+
+// ─── Utils ───
+function toast(msg, type = 'info') {
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.textContent = msg;
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(() => el.remove(), 4000);
+}
+
+async function api(path, opts = {}) {
+  const res = await fetch(`${API}${path}`, {
+    headers: { 'Content-Type': 'application/json' },
+    ...opts,
+  });
+  return res.json();
+}
+
+function fmt(n) {
+  if (n == null || isNaN(n)) return '-';
+  return n.toLocaleString('en-IN', { maximumFractionDigits: 2 });
+}
+
+function pnlClass(n) { return n > 0 ? 'pnl-positive' : n < 0 ? 'pnl-negative' : ''; }
+
+// ─── Tabs ───
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === `panel-${tab}`));
+  if (tab === 'watchlist' && !wlData) loadWatchlist();
+  if (tab === 'portfolio') loadPositions();
+  if (tab === 'fno' && !fnoData) runFnoScan();
+}
+
+// ─── Auth ───
+async function checkAuth() {
+  try {
+    const data = await api('/api/auth');
+    const badge = document.getElementById('authBadge');
+    const text = document.getElementById('authText');
+    if (data.status === 'VALID') {
+      badge.className = 'auth-badge valid';
+      text.textContent = `Authenticated (${data.user})`;
+    } else {
+      badge.className = 'auth-badge expired';
+      text.textContent = 'Token Expired — click to login';
+    }
+  } catch {
+    document.getElementById('authBadge').className = 'auth-badge expired';
+    document.getElementById('authText').textContent = 'Connection Error';
+  }
+}
+
+async function reAuthenticate() {
+  try {
+    const data = await api('/api/auth/login');
+    if (!data.auth_url) { toast('Could not get login URL', 'error'); return; }
+
+    const popup = window.open(data.auth_url, 'upstox_auth', 'width=500,height=700');
+
+    // Poll for popup close
+    const pollTimer = setInterval(async () => {
+      if (popup && popup.closed) {
+        clearInterval(pollTimer);
+        document.getElementById('authBadge').className = 'auth-badge loading';
+        document.getElementById('authText').textContent = 'Verifying...';
+        await checkAuth();
+        toast('Authentication refreshed!', 'success');
+      }
+    }, 500);
+  } catch (e) {
+    toast('Auth error: ' + e.message, 'error');
+  }
+}
+
+// ─── Scanner ───
+let scanAbort = null;
+
+async function retryFailedStocks() {
+  if (!scanData || !scanData.summary) return;
+  const intFailed = scanData.summary.intraday?.failed_symbols || [];
+  const totalFailed = (scanData.summary.failed?.stocks || []);
+  const allFailed = [...new Set([...intFailed, ...totalFailed.map(s => s.split(':')[0])])];
+  if (allFailed.length === 0) { toast('No failed stocks to retry', 'info'); return; }
+
+  toast(`Retrying ${allFailed.length} failed stocks...`, 'info');
+
+  // Re-run full scan — the cache will serve the successful ones instantly,
+  // only the failed ones will hit the API fresh
+  await runScan();
+}
+
+// Show per-stock data quality indicator in the scanner table
+function dataQualityBadge(stock) {
+  if (!stock.has_intraday) return '<span title="No live data — using yesterday close" style="color:var(--red);font-size:10px;cursor:help">●</span>';
+  if (stock.data_source === 'cache') return '<span title="Historical from cache + live intraday OK" style="color:var(--green);font-size:10px;cursor:help">●</span>';
+  return '<span title="Fresh API fetch + live intraday OK" style="color:var(--green);font-size:10px;cursor:help">●</span>';
+}
+
+async function runScan() {
+  const btn = document.getElementById('scanBtn');
+
+  // Check auth first
+  try {
+    const auth = await api('/api/auth');
+    if (auth.status !== 'VALID') {
+      toast('⚠️ Upstox token expired! Click the auth badge (top-right) to re-authenticate.', 'error');
+      document.getElementById('authBadge').className = 'auth-badge expired';
+      document.getElementById('authText').textContent = 'Token Expired — click to login';
+      return;
+    }
+  } catch {}
+
+  if (scanAbort) {
+    scanAbort.abort = true;
+    btn.innerHTML = 'Scan Now';
+    scanAbort = null;
+    return;
+  }
+
+  const controller = { abort: false };
+  scanAbort = controller;
+  btn.innerHTML = '<span class="spinner"></span> Stop';
+
+  // Show progress
+  document.getElementById('scanBody').innerHTML = `
+    <div style="padding:20px">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+        <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden">
+          <div id="scanProgress" style="height:100%;background:var(--blue);width:5%;transition:width 0.5s"></div>
+        </div>
+        <span id="scanProgressText" style="font-size:13px;color:var(--text2)">Loading from cache + live data...</span>
+      </div>
+    </div>`;
+
+  try {
+    const cat = currentScanFilter === 'ALL' ? 'ALL' : currentScanFilter;
+    scanData = await api(`/api/scan?category=${cat}`);
+    if (controller.abort) return;
+
+    // Normalize fresh_today from string "True"/"False" to boolean
+    (scanData.stocks || []).forEach(s => { s.fresh_today = s.fresh_today === true || s.fresh_today === 'True'; });
+
+    // Compute summary if not provided
+    if (!scanData.summary) {
+      scanData.summary = {
+        total: (scanData.stocks || []).length,
+        fresh_today: (scanData.stocks || []).filter(s => s.fresh_today).length,
+        with_buys: (scanData.stocks || []).filter(s => s.buy_count > 0).length,
+        with_sells: (scanData.stocks || []).filter(s => s.sell_count > 0).length,
+      };
+    }
+
+    renderScan();
+    updateCacheStatus();
+
+    const s = scanData.summary;
+    const dataQ = s.data || {};
+    const intQ = s.intraday || {};
+    const failQ = s.failed || {};
+    const staleQ = s.stale || {};
+
+    // Show detailed scan health banner
+    const healthEl = document.getElementById('scanHealth');
+    if (healthEl) {
+      // Detect if market is closed (weekend or off-hours)
+      const now = new Date();
+      const day = now.getDay(); // 0=Sun, 6=Sat
+      const hour = now.getHours();
+      const isWeekend = day === 0 || day === 6;
+      const isOffHours = hour < 9 || hour > 16; // Before 9 AM or after 4 PM
+      const isMarketClosed = isWeekend || isOffHours;
+      const allIntradayFailed = intQ.failed === (s.total_scanned || s.total) && intQ.success === 0;
+      const intradaySkipped = intQ.skipped === true;
+
+      const allGood = failQ.count === 0 && (intQ.failed === 0 || isMarketClosed);
+      const scanTime = s.scan_time ? new Date(s.scan_time).toLocaleTimeString('en-IN') : '';
+
+      // Find last data date from stale info or stocks
+      const lastDataDate = staleQ.stocks?.[0]?.last_date || 'unknown';
+
+      let html = `<div style="padding:10px 16px;font-size:12px;background:${allGood ? 'var(--green-bg)' : 'var(--yellow-bg)'};border-radius:6px;margin-bottom:8px">`;
+      html += `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">`;
+
+      if (isMarketClosed) {
+        const reason = isWeekend ? (day === 0 ? 'Sunday' : 'Saturday') : 'Market closed';
+        html += `<span style="font-weight:600;color:var(--blue)">ℹ ${reason} — showing signals from last trading day (${lastDataDate})</span>`;
+      } else if (allIntradayFailed && !isMarketClosed) {
+        html += `<span style="font-weight:600;color:var(--red)">⚠ Intraday API down — using last trading day data (${lastDataDate})</span>`;
+      } else if (allGood) {
+        html += `<span style="font-weight:600;color:var(--green)">✓ All data fetched successfully</span>`;
+      } else {
+        html += `<span style="font-weight:600;color:var(--yellow)">⚠ Some data issues detected</span>`;
+      }
+      html += `<span style="color:var(--text2);font-size:11px">${scanTime}</span></div>`;
+
+      html += `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:6px">`;
+      html += `<div><span style="color:var(--text2)">Scanned</span><br><b>${s.total_scanned || s.total}/${s.total_watchlist || s.total}</b></div>`;
+      html += `<div><span style="color:var(--text2)">Historical</span><br><b style="color:var(--green)">${dataQ.cache_hits || 0} cache</b> + <b>${dataQ.api_fetches || 0} API</b></div>`;
+      html += `<div><span style="color:var(--text2)">Live Intraday</span><br><b style="color:${intQ.failed > 0 ? 'var(--red)' : 'var(--green)'}">${intQ.success || 0}✓</b> <b style="color:${intQ.failed > 0 ? 'var(--red)' : 'var(--text2)'}">${intQ.failed || 0}✗</b></div>`;
+      html += `<div><span style="color:var(--text2)">Failed</span><br><b style="color:${failQ.count > 0 ? 'var(--red)' : 'var(--green)'}">${failQ.count || 0} stocks</b></div>`;
+      html += `</div>`;
+
+      // Show failed/stale details if any
+      if (intQ.failed > 0 && intQ.failed_symbols && intQ.failed_symbols.length > 0 && !isMarketClosed) {
+        html += `<div style="margin-top:8px;padding:6px 10px;background:var(--bg);border-radius:4px">`;
+        if (allIntradayFailed || intradaySkipped) {
+          html += `<div style="color:var(--red);font-weight:600;font-size:11px;margin-bottom:4px">⚠ Intraday API unreachable for all stocks — retry won't help. Check Upstox token or try again later.</div>`;
+        } else {
+          html += `<div style="color:var(--yellow);font-weight:600;font-size:11px;margin-bottom:4px">⚠ No live intraday data (using yesterday's close):</div>`;
+          html += `<div style="font-size:11px;color:var(--text2);word-break:break-all">${intQ.failed_symbols.join(', ')}</div>`;
+          html += `<button class="btn sm" onclick="retryFailedStocks()" style="margin-top:6px;font-size:11px;padding:3px 10px">↻ Retry Failed</button>`;
+        }
+        html += `</div>`;
+      }
+      if (failQ.count > 0 && failQ.stocks && failQ.stocks.length > 0) {
+        html += `<div style="margin-top:6px;padding:6px 10px;background:var(--red-bg);border-radius:4px">`;
+        html += `<div style="color:var(--red);font-weight:600;font-size:11px;margin-bottom:4px">✗ Completely failed (no data at all):</div>`;
+        html += `<div style="font-size:11px;color:var(--text2);word-break:break-all">${failQ.stocks.join(', ')}</div>`;
+        html += `</div>`;
+      }
+      if (staleQ.count > 0 && staleQ.stocks && staleQ.stocks.length > 0) {
+        html += `<div style="margin-top:6px;padding:6px 10px;background:var(--yellow-bg);border-radius:4px">`;
+        html += `<div style="color:var(--yellow);font-weight:600;font-size:11px;margin-bottom:4px">⏰ Stale data (no intraday + cache behind):</div>`;
+        html += `<div style="font-size:11px;color:var(--text2)">${staleQ.stocks.map(s => `${s.symbol}(${s.last_date})`).join(', ')}</div>`;
+        html += `</div>`;
+      }
+
+      html += `</div>`;
+      healthEl.innerHTML = html;
+      healthEl.style.display = 'block';
+    }
+
+    toast(`Scanned ${s.total_scanned || s.total} stocks | Intraday: ${intQ.success || 0}✓ ${intQ.failed || 0}✗ | Cache: ${dataQ.cache_hits || 0}`,
+      (failQ.count || 0) > 0 ? 'error' : (intQ.failed || 0) > 5 ? 'info' : 'success');
+
+  } catch (e) {
+    if (!controller.abort) {
+      document.getElementById('scanBody').innerHTML = '<div class="loading-overlay">Scan failed. Check if server is running.</div>';
+      toast('Scan failed: ' + e.message, 'error');
+    }
+  } finally {
+    btn.innerHTML = 'Scan Now';
+    scanAbort = null;
+  }
+}
+
+let currentSignalFilter = 'ALL';
+
+function filterScan(cat) {
+  currentScanFilter = cat;
+  document.querySelectorAll('#scanFilter .pill').forEach(p => p.classList.toggle('active', p.dataset.filter === cat));
+  renderScan();
+}
+
+function filterSignal(filter) {
+  currentSignalFilter = filter;
+  document.querySelectorAll('#signalFilter .pill').forEach(p => p.classList.toggle('active', p.dataset.filter === filter));
+  renderScan();
+}
+
+function signalBadge(sig) {
+  if (!sig || sig === 'NEUTRAL') return '<span class="signal sm NEUTRAL">-</span>';
+  const label = sig.replace('FRESH_', '').replace('RECENT_', '').replace('_', ' ');
+  const fresh = sig.startsWith('FRESH_') ? '*' : '';
+  return `<span class="signal sm ${sig}" title="${sig}">${label}${fresh}</span>`;
+}
+
+const STRAT_SHORT = {BB_RSI:'BB+R',STOCH_RSI:'StR',RSI_OBOS:'RSI',CANSLIM:'CAN',DUAL_MOM:'DM',SUPERTREND:'ST'};
+function entryBadge(s) {
+  if (!s.invested) return '';
+  // Use fingerprint to show all BUY strategies at entry (not just the single signal_strategy)
+  if (s.entry_fingerprints && s.entry_fingerprints.length > 0) {
+    // Use the latest fingerprint (last buy)
+    const fp = s.entry_fingerprints[s.entry_fingerprints.length - 1];
+    const buyStrats = fp.split(' | ')
+      .filter(p => p.includes('*'))
+      .map(p => { const name = p.split(':')[0]; return STRAT_SHORT[name] || name; });
+    if (buyStrats.length > 0) {
+      const label = buyStrats.join('+');
+      return `<span class="signal sm BUY" title="${fp}" style="font-size:9px">${label}</span>`;
+    }
+    // Had fingerprint but no BUY strategies — was a BULLISH entry
+    return `<span class="signal sm BULLISH" title="${fp}" style="font-size:9px">BULL</span>`;
+  }
+  if (!s.entry_strategy) return '<span class="signal sm NEUTRAL" title="Legacy holding">LEG</span>';
+  const short = STRAT_SHORT[s.entry_strategy] || s.entry_strategy;
+  return `<span class="signal sm BUY" title="Entered via ${s.entry_strategy}">${short}</span>`;
+}
+
+function consensusBadge(s) {
+  const bc = s.buy_count || 0;
+  // Only count SELL if you hold the stock
+  const sc = s.invested ? (s.sell_count || 0) : 0;
+  if (bc > 0 && sc > 0) return `<span class="consensus conflict">${bc}B/${sc}S</span>`;
+  if (bc > 0) return `<span class="consensus buy">${bc}/6 BUY</span>`;
+  if (sc > 0) return `<span class="consensus sell">${sc}/6 SELL</span>`;
+  return `<span class="consensus neutral">-</span>`;
+}
+
+function renderScan() {
+  if (!scanData || !scanData.stocks) return;
+
+  let stocks = currentScanFilter === 'ALL'
+    ? scanData.stocks
+    : scanData.stocks.filter(s => s.category === currentScanFilter);
+
+  // Apply signal filter
+  if (currentSignalFilter === 'FRESH') stocks = stocks.filter(s => s.fresh_today);
+  else if (currentSignalFilter === 'BUYS') stocks = stocks.filter(s => s.buy_count > 0);
+  else if (currentSignalFilter === 'SELLS') stocks = stocks.filter(s => s.sell_count > 0);
+
+  // Stats
+  const summary = scanData.summary || {};
+  document.getElementById('scanStats').innerHTML = `
+    <div class="stat-card"><div class="label">Fresh Today</div><div class="value" style="color:var(--yellow)">${summary.fresh_today || 0}</div></div>
+    <div class="stat-card"><div class="label">Buy Signals</div><div class="value green">${summary.with_buys || 0}</div></div>
+    <div class="stat-card"><div class="label">Sell Signals</div><div class="value red">${summary.with_sells || 0}</div></div>
+    <div class="stat-card"><div class="label">Total Scanned</div><div class="value blue">${summary.total_scanned || summary.total || 0}</div></div>
+  `;
+
+  if (stocks.length === 0) {
+    document.getElementById('scanBody').innerHTML = '<div class="loading-overlay">No stocks match filters</div>';
+    return;
+  }
+
+  // Strategy column headers
+  const stratNames = ['BB_RSI', 'STOCH_RSI', 'RSI_OBOS', 'CANSLIM', 'DUAL_MOM', 'SUPERTREND'];
+  const stratLabels = ['BB+RSI', 'Stch+RSI', 'RSI', 'CANSLIM', 'DualMom', 'SuperT'];
+
+  let html = `<table>
+    <thead><tr>
+      <th>Symbol</th><th>Cat</th><th>Signals</th>`;
+  for (const l of stratLabels) html += `<th>${l}</th>`;
+  html += `<th>LTP</th><th>Off High</th><th>Entry</th><th></th>
+    </tr></thead><tbody>`;
+
+  for (const s of stocks) {
+    const freshMark = s.fresh_today ? ' style="border-left: 3px solid var(--yellow)"' : '';
+    html += `<tr${freshMark}>
+      <td><strong>${s.symbol}</strong> ${dataQualityBadge(s)}</td>
+      <td><span class="category-badge ${s.category}">${s.category === 'LARGECAP' ? 'LC' : 'MC'}</span></td>
+      <td>${consensusBadge(s)}</td>`;
+
+    // Strategy signal badges — dim SELL signals on stocks not invested
+    for (const sn of stratNames) {
+      const strat = (s.strategies || []).find(st => st.strategy === sn);
+      if (strat) {
+        const isSell = strat.signal.includes('SELL');
+        const dimSell = isSell && !s.invested;
+        html += `<td>${dimSell ? '<span class="signal sm NEUTRAL" title="SELL (not holding)">-</span>' : signalBadge(strat.signal)}</td>`;
+      } else {
+        html += `<td>-</td>`;
+      }
+    }
+
+    html += `<td>${fmt(s.ltp)}</td>
+      <td>${fmt(s.correction_from_52w_high_pct)}%</td>
+      <td>${entryBadge(s)}</td>
+      <td><button class="btn-icon" onclick="toggleExpand('${s.symbol}')" title="Details" style="font-size:12px">▼</button></td>
+    </tr>`;
+
+    // Expandable detail row (hidden by default)
+    const colSpan = stratLabels.length + 6;
+    html += `<tr class="expand-row" id="expand-${s.symbol}" style="display:none"><td colspan="${colSpan}">`;
+    html += `<div class="ind-grid">`;
+    for (const strat of (s.strategies || [])) {
+      const inds = strat.indicators || {};
+      html += `<div class="ind-item">`;
+      html += `<span class="ind-label">${strat.strategy}</span> ${signalBadge(strat.signal)}`;
+      // Show key indicator values inline
+      html += `<div style="margin-top:4px">`;
+      for (const [k, v] of Object.entries(inds)) {
+        if (['buy_conditions','sell_conditions','buy_met','sell_met'].includes(k)) continue;
+        html += `<div style="display:inline-block;margin-right:10px;margin-top:2px"><span style="color:var(--text2);font-size:10px">${k}: </span><span class="ind-value">${typeof v === 'number' ? fmt(v) : v}</span></div>`;
+      }
+      html += `</div>`;
+      // Conditions view
+      if (inds.buy_conditions || inds.sell_conditions) {
+        html += `<div style="margin-top:6px;display:flex;gap:16px;flex-wrap:wrap">`;
+        if (inds.buy_conditions) {
+          const conds = inds.buy_conditions;
+          html += `<div style="flex:1;min-width:200px"><div style="font-size:10px;color:var(--green);font-weight:600;margin-bottom:3px">BUY (${inds.buy_met || '?'})</div>`;
+          for (const c of conds) {
+            const icon = c.met ? '<span style="color:var(--green)">✓</span>' : '<span style="color:var(--text2)">✗</span>';
+            const almost = !c.met && typeof c.gap === 'string' && (c.gap.match(/^[+-]?([0-9.]+)/) && parseFloat(c.gap) !== 0 && Math.abs(parseFloat(c.gap)) < 3);
+            const gapStyle = c.met ? 'color:var(--green)' : (almost ? 'color:var(--yellow)' : 'color:var(--text2)');
+            const joinLabel = c.join ? ` <span style="color:var(--text2);font-size:9px">${c.join}</span>` : '';
+            html += `<div style="font-size:11px;margin:2px 0">${icon} ${c.label} <span style="font-size:10px;${gapStyle}">→ ${c.gap}</span>${joinLabel}</div>`;
+          }
+          html += `</div>`;
+        }
+        if (inds.sell_conditions) {
+          const conds = inds.sell_conditions;
+          html += `<div style="flex:1;min-width:200px"><div style="font-size:10px;color:var(--red);font-weight:600;margin-bottom:3px">SELL (${inds.sell_met || '?'})</div>`;
+          for (const c of conds) {
+            const icon = c.met ? '<span style="color:var(--red)">✓</span>' : '<span style="color:var(--text2)">✗</span>';
+            const joinLabel = c.join ? ` <span style="color:var(--text2);font-size:9px">${c.join}</span>` : '';
+            html += `<div style="font-size:11px;margin:2px 0">${icon} ${c.label} <span style="font-size:10px;color:var(--text2)">→ ${c.gap}</span>${joinLabel}</div>`;
+          }
+          html += `</div>`;
+        }
+        html += `</div>`;
+      }
+      html += `</div>`;
+    }
+    html += `</div>`;
+
+    // Entry fingerprint for invested STRATEGY stocks
+    if (s.invested && s.entry_fingerprints && s.entry_fingerprints.length > 0) {
+      html += `<div style="margin-top:10px;padding:8px 10px;background:var(--bg1);border:1px solid var(--border);border-left:3px solid var(--blue);border-radius:4px">`;
+      html += `<div style="font-size:10px;color:var(--text2);font-weight:600;margin-bottom:6px">Entry Signal Fingerprint</div>`;
+      s.entry_fingerprints.forEach((fp, idx) => {
+        const parts = fp.split(' | ').map(part => {
+          const [name, sig] = part.split(':');
+          const isBuy = sig && sig.includes('*');
+          const shortName = name.replace('_', '');
+          const sigClean = (sig || '').replace('*', '');
+          let color = 'var(--text2)', bg = 'transparent', border = '1px solid var(--border)';
+          if (isBuy) { color = 'var(--green)'; bg = 'var(--green-bg)'; border = '1px solid var(--green)'; }
+          else if (sigClean === 'BULLISH') { color = 'var(--blue)'; bg = 'var(--blue-bg)'; border = '1px solid var(--blue)'; }
+          else if (sigClean === 'BEARISH' || sigClean.includes('SELL')) { color = 'var(--red)'; bg = 'var(--red-bg)'; border = '1px solid var(--red)'; }
+          return `<span style="font-size:9px;padding:1px 4px;border-radius:3px;color:${color};background:${bg};border:${border};white-space:nowrap" title="${name}: ${sigClean}">${shortName}:${sigClean}${isBuy ? '*' : ''}</span>`;
+        }).join(' ');
+        const buyLabel = s.entry_fingerprints.length > 1 ? `<span style="font-size:9px;color:var(--text2);margin-right:2px;font-weight:600">Buy${idx+1}:</span>` : '';
+        html += `<div style="display:flex;flex-wrap:wrap;gap:3px;align-items:center;${idx > 0 ? 'margin-top:4px;padding-top:4px;border-top:1px solid var(--border)' : ''}">${buyLabel}${parts}</div>`;
+      });
+      html += `</div>`;
+    }
+
+    html += `</td></tr>`;
+  }
+
+  html += '</tbody></table>';
+  document.getElementById('scanBody').innerHTML = html;
+}
+
+function toggleExpand(symbol) {
+  const row = document.getElementById('expand-' + symbol);
+  if (row) row.style.display = row.style.display === 'none' ? '' : 'none';
+}
+
+// ─── Watchlist ───
+async function loadWatchlist() {
+  try {
+    wlData = await api('/api/watchlist?category=ALL');
+    renderWatchlist();
+  } catch (e) {
+    document.getElementById('wlBody').innerHTML = '<div class="loading-overlay">Error loading watchlist</div>';
+  }
+}
+
+function filterWl(cat) {
+  currentWlFilter = cat;
+  document.querySelectorAll('#wlFilter .pill').forEach(p => p.classList.toggle('active', p.dataset.filter === cat));
+  renderWatchlist();
+}
+
+function renderWatchlist() {
+  if (!wlData || !wlData.stocks) return;
+
+  const stocks = currentWlFilter === 'ALL'
+    ? wlData.stocks
+    : wlData.stocks.filter(s => s.category === currentWlFilter);
+
+  document.getElementById('wlStats').innerHTML = `
+    <div class="stat-card"><div class="label">Total Stocks</div><div class="value blue">${wlData.total}</div></div>
+    <div class="stat-card"><div class="label">Large Cap</div><div class="value">${wlData.largecap}</div></div>
+    <div class="stat-card"><div class="label">Mid Cap</div><div class="value">${wlData.midcap}</div></div>
+    <div class="stat-card"><div class="label">Invested</div><div class="value green">${wlData.stocks.filter(s => s.invested).length}</div></div>
+  `;
+
+  let html = `<table>
+    <thead><tr>
+      <th>Symbol</th><th>Category</th><th>Instrument Key</th><th>Invested</th><th>Added</th><th></th>
+    </tr></thead><tbody>`;
+
+  for (const s of stocks) {
+    html += `<tr>
+      <td><strong>${s.symbol}</strong></td>
+      <td><span class="category-badge ${s.category}">${s.category}</span></td>
+      <td style="font-size:11px;color:var(--text2)">${s.instrument_key}</td>
+      <td>${s.invested ? '<span class="invested-dot"></span>' : ''}</td>
+      <td style="color:var(--text2)">${s.added_at ? s.added_at.slice(0, 10) : '-'}</td>
+      <td><button class="btn-icon" onclick="removeStock('${s.symbol}')" title="Remove">&times;</button></td>
+    </tr>`;
+  }
+
+  html += '</tbody></table>';
+  document.getElementById('wlBody').innerHTML = html;
+}
+
+async function removeStock(symbol) {
+  if (!confirm(`Remove ${symbol} from watchlist?`)) return;
+  try {
+    await api(`/api/watchlist?symbol=${symbol}`, { method: 'DELETE' });
+    toast(`Removed ${symbol}`, 'success');
+    loadWatchlist();
+  } catch (e) {
+    toast('Remove failed', 'error');
+  }
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// ─── Add Stock (searchable dropdown from master list) ───
+async function loadStockMaster() {
+  try {
+    stockMaster = await api('/api/stock-master');
+  } catch { stockMaster = []; }
+}
+
+function openAddModal() {
+  selectedAddStock = null;
+  document.getElementById('addSearchInput').value = '';
+  document.getElementById('addSelected').value = '';
+  document.getElementById('addStockBtn').disabled = true;
+  document.getElementById('addDropdown').classList.remove('open');
+  document.getElementById('addModal').classList.add('open');
+  setTimeout(() => document.getElementById('addSearchInput').focus(), 100);
+}
+
+function renderAddDropdown(query) {
+  const dd = document.getElementById('addDropdown');
+  if (!query || query.length < 1) { dd.classList.remove('open'); return; }
+
+  // Filter: exclude already watchlisted symbols
+  const wlSymbols = new Set((wlData?.stocks || []).map(s => s.symbol));
+  const matches = stockMaster
+    .filter(s => !wlSymbols.has(s.symbol) && s.symbol.toLowerCase().includes(query.toLowerCase()))
+    .slice(0, 20);
+
+  if (matches.length === 0) {
+    dd.innerHTML = '<div class="no-results">No matching stocks</div>';
+  } else {
+    dd.innerHTML = matches.map(s =>
+      `<div class="opt" onclick="selectAddStock('${s.symbol}', '${s.instrument_key}', '${s.category}')">
+        <span>${s.symbol}</span>
+        <span class="cat-tag ${s.category}">${s.category}</span>
+      </div>`
+    ).join('');
+  }
+  dd.classList.add('open');
+}
+
+function selectAddStock(symbol, instrument_key, category) {
+  selectedAddStock = { symbol, instrument_key, category };
+  document.getElementById('addSearchInput').value = symbol;
+  document.getElementById('addSelected').value = `${symbol} (${category}) — ${instrument_key}`;
+  document.getElementById('addStockBtn').disabled = false;
+  document.getElementById('addDropdown').classList.remove('open');
+}
+
+document.getElementById('addSearchInput').addEventListener('input', (e) => {
+  renderAddDropdown(e.target.value);
+  selectedAddStock = null;
+  document.getElementById('addSelected').value = '';
+  document.getElementById('addStockBtn').disabled = true;
+});
+
+async function addStock() {
+  if (!selectedAddStock) { toast('Select a stock first', 'error'); return; }
+
+  try {
+    await api('/api/watchlist', {
+      method: 'POST',
+      body: JSON.stringify(selectedAddStock),
+    });
+    toast(`Added ${selectedAddStock.symbol}`, 'success');
+    closeModal('addModal');
+    loadWatchlist();
+  } catch (e) {
+    toast('Add failed', 'error');
+  }
+}
+
+// ─── Portfolio ───
+let tradeHistory = [];
+let currentPortfolioTab = 'strategy';
+
+function switchPortfolioTab(tab) {
+  currentPortfolioTab = tab;
+  document.querySelectorAll('[data-ptab]').forEach(t => {
+    const isActive = t.dataset.ptab === tab;
+    t.style.borderBottomColor = isActive ? 'var(--blue)' : 'transparent';
+    t.style.color = isActive ? 'var(--blue)' : 'var(--text2)';
+  });
+  loadPositions();
+}
+
+async function syncTrades() {
+  const btn = document.getElementById('syncBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Syncing...';
+
+  try {
+    // Call local sync server
+    const res = await fetch('http://localhost:9876/sync', { method: 'POST' });
+    toast('Sync triggered — fetching contract notes from Gmail...', 'info');
+
+    // Wait a bit for sync to complete, then auto-tag
+    setTimeout(async () => {
+      try {
+        await fetch(`${API}/api/trades/auto-tag`, { method: 'POST' });
+        toast('Trades synced and auto-tagged!', 'success');
+        loadPositions();
+      } catch {}
+      btn.disabled = false;
+      btn.innerHTML = 'Sync Trades';
+    }, 10000);
+  } catch (e) {
+    toast('Sync server not running. Start it: python3 scripts/sync_server.py', 'error');
+    btn.disabled = false;
+    btn.innerHTML = 'Sync Trades';
+  }
+}
+
+async function togglePortfolioTag(symbol, newTag) {
+  try {
+    const res = await api('/api/equity/tag-bulk', { method: 'PUT', body: JSON.stringify({ symbol, portfolio: newTag }) });
+    if (!res.success) { toast('Failed to update', 'error'); return; }
+    toast(`${symbol} moved to ${newTag}`, 'success');
+    // Small delay to ensure DB write is committed before re-read
+    await new Promise(r => setTimeout(r, 300));
+    await loadPositions();
+  } catch (e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function autoTagStrategies() {
+  const btn = document.getElementById('autoTagBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Tagging...';
+
+  try {
+    // First run a scan to get current signals
+    const scanResult = await api('/api/scan?category=ALL');
+    if (!scanResult.stocks || scanResult.stocks.length === 0) {
+      toast('No scan data — run Signal Scanner first, then try again', 'error');
+      return;
+    }
+
+    // Then call auto-tag with scan results
+    const tagResult = await api('/api/trades/auto-tag', {
+      method: 'POST',
+      body: JSON.stringify({ scan_results: scanResult.stocks }),
+    });
+
+    const tagged = tagResult.tagged || 0;
+    if (tagged > 0) {
+      toast(`Tagged ${tagged} trade(s) with strategies!`, 'success');
+      loadPositions(); // Refresh portfolio
+    } else {
+      toast('No new trades to tag — all legacy trades already matched or no matching signals', 'info');
+    }
+  } catch (e) {
+    toast('Auto-tag error: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = 'Auto-Tag Strategies';
+  }
+}
+
+async function handleCsvUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const text = await file.text();
+  const lines = text.split('\n').filter(l => l.trim());
+  if (lines.length < 2) { toast('Empty CSV', 'error'); return; }
+
+  // Parse header
+  const header = lines[0].toLowerCase().split(',').map(h => h.trim().replace(/"/g, ''));
+  const symIdx = header.findIndex(h => h.includes('symbol') || h.includes('tradingsymbol') || h.includes('scrip'));
+  const actionIdx = header.findIndex(h => h.includes('trade_type') || h.includes('action') || h.includes('type') || h.includes('buy') || h.includes('transaction'));
+  const priceIdx = header.findIndex(h => h.includes('price') || h.includes('rate'));
+  const qtyIdx = header.findIndex(h => h.includes('quantity') || h.includes('qty'));
+  const dateIdx = header.findIndex(h => h.includes('date') || h.includes('trade_date'));
+
+  if (symIdx < 0 || priceIdx < 0 || qtyIdx < 0) {
+    toast('CSV must have symbol, price, quantity columns', 'error');
+    return;
+  }
+
+  const trades = [];
+  for (let i = 1; i < lines.length; i++) {
+    const cols = lines[i].split(',').map(c => c.trim().replace(/"/g, ''));
+    if (cols.length < Math.max(symIdx, priceIdx, qtyIdx) + 1) continue;
+
+    const symbol = cols[symIdx].toUpperCase();
+    let action = actionIdx >= 0 ? cols[actionIdx].toUpperCase() : 'BUY';
+    if (action.includes('BUY') || action === 'B') action = 'BUY';
+    else if (action.includes('SELL') || action === 'S') action = 'SELL';
+    else action = 'BUY';
+
+    const price = parseFloat(cols[priceIdx]);
+    const qty = parseInt(cols[qtyIdx]);
+    const date = dateIdx >= 0 ? cols[dateIdx] : new Date().toISOString().slice(0, 10);
+
+    if (symbol && !isNaN(price) && !isNaN(qty) && price > 0 && qty > 0) {
+      trades.push({ symbol, action, price, quantity: qty, trade_date: date, broker: 'ZERODHA', portfolio: 'LEGACY', source: 'CSV' });
+    }
+  }
+
+  if (trades.length === 0) { toast('No valid trades found in CSV', 'error'); return; }
+
+  if (!confirm(`Import ${trades.length} trades as LEGACY portfolio?`)) return;
+
+  try {
+    const result = await api('/api/trades/import', {
+      method: 'POST',
+      body: JSON.stringify({ trades }),
+    });
+    toast(`Imported ${result.imported || 0} trades, skipped ${result.skipped || 0}`, 'success');
+    loadPositions();
+  } catch (e) {
+    toast('Import failed: ' + e.message, 'error');
+  }
+  event.target.value = '';
+}
+
+async function loadPositions() {
+  try {
+    const portfolioParam = currentPortfolioTab === 'strategy' ? '&portfolio=STRATEGY' : currentPortfolioTab === 'legacy' ? '&portfolio=LEGACY' : '';
+    portData = await api(`/api/positions?show_closed=true${portfolioParam}`);
+    const tradesData = await api('/api/trades');
+    tradeHistory = tradesData.trades || [];
+
+    if (currentPortfolioTab === 'strategy') {
+      tradeHistory = tradeHistory.filter(t => t.portfolio === 'STRATEGY');
+    } else if (currentPortfolioTab === 'legacy') {
+      tradeHistory = tradeHistory.filter(t => !t.portfolio || t.portfolio === 'LEGACY');
+    }
+
+    renderPositions();
+  } catch (e) {
+    document.getElementById('portOpenBody').innerHTML = '<div class="loading-overlay">Error loading positions</div>';
+  }
+}
+
+function renderPositions() {
+  if (!portData) return;
+
+  const s = portData.summary || {};
+  document.getElementById('portStats').innerHTML = `
+    <div class="stat-card"><div class="label">Open Positions</div><div class="value blue">${s.open_positions || 0}</div></div>
+    <div class="stat-card"><div class="label">Total Invested</div><div class="value">${fmt(s.total_invested)}</div></div>
+    <div class="stat-card"><div class="label">Realized P&L</div><div class="value ${pnlClass(s.total_realized_pnl)}">${fmt(s.total_realized_pnl)}</div></div>
+    <div class="stat-card"><div class="label">Wins / Losses</div><div class="value">${s.wins || 0} / ${s.losses || 0}</div></div>
+  `;
+
+  // Open positions — fetch LTP for unrealized P&L
+  const open = portData.open_positions || [];
+  if (open.length === 0) {
+    document.getElementById('portOpenBody').innerHTML = '<div class="loading-overlay">No open positions. Record a BUY trade to start tracking.</div>';
+  } else {
+    // Get LTP from scan data if available, otherwise show without
+    const ltpMap = {};
+    if (scanData && scanData.stocks) {
+      for (const s of scanData.stocks) {
+        if (s.ltp) ltpMap[s.symbol] = s.ltp;
+      }
+    }
+
+    let totalUnrealized = 0;
+    let totalCurrentValue = 0;
+    let totalInvested = 0;
+
+    let html = `<table>
+      <thead><tr><th>Symbol</th><th>Qty</th><th>Avg Buy</th><th>LTP</th><th>Invested</th><th>Current Value</th><th>Unrealized P&L</th><th>P&L %</th><th>Portfolio</th><th>Strategy</th></tr></thead><tbody>`;
+    for (const p of open) {
+      const ltp = ltpMap[p.symbol] || 0;
+      const currentValue = ltp > 0 ? ltp * p.net_quantity : 0;
+      const unrealizedPnl = ltp > 0 ? currentValue - p.total_invested : null;
+      const unrealizedPct = ltp > 0 && p.total_invested > 0 ? ((currentValue - p.total_invested) / p.total_invested * 100) : null;
+
+      if (unrealizedPnl !== null) {
+        totalUnrealized += unrealizedPnl;
+        totalCurrentValue += currentValue;
+      }
+      totalInvested += p.total_invested;
+
+      const isStrategy = p.portfolio === 'STRATEGY';
+      const toggleBtn = `<button class="btn sm ${isStrategy ? 'success' : ''}" style="font-size:10px;padding:2px 8px"
+        onclick="togglePortfolioTag('${p.symbol}', '${isStrategy ? 'LEGACY' : 'STRATEGY'}')">${isStrategy ? 'STRATEGY' : 'LEGACY'}</button>`;
+      // Strategy column: derive from fingerprint (shows all BUY strategies at entry)
+      let stratBadge = '<span style="color:var(--text2);font-size:11px">—</span>';
+      if (p.signal_fingerprint) {
+        // May have multiple buys separated by " || " — use the latest
+        const lastFp = p.signal_fingerprint.split(' || ').pop();
+        const buyStrats = lastFp.split(' | ')
+          .filter(part => part.includes('*'))
+          .map(part => { const name = part.split(':')[0]; return STRAT_SHORT[name] || name; });
+        if (buyStrats.length > 0) {
+          stratBadge = `<span style="font-size:10px;padding:2px 6px;border-radius:3px;background:var(--green-bg);color:var(--green);font-weight:600" title="${lastFp}">${buyStrats.join('+')}</span>`;
+        } else {
+          stratBadge = `<span style="font-size:10px;padding:2px 6px;border-radius:3px;background:var(--blue-bg);color:var(--blue);font-weight:600" title="${lastFp}">BULL</span>`;
+        }
+      } else if (p.signal_strategy) {
+        const short = STRAT_SHORT[p.signal_strategy] || p.signal_strategy;
+        stratBadge = `<span style="font-size:10px;padding:2px 6px;border-radius:3px;background:var(--blue-bg);color:var(--blue);font-weight:600">${short}</span>`;
+      }
+
+      // Build fingerprint badges from signal_fingerprint string
+      let fpHtml = '';
+      if (p.signal_fingerprint) {
+        // May have multiple buys separated by " || "
+        const buyEntries = p.signal_fingerprint.split(' || ');
+        fpHtml = buyEntries.map((entry, idx) => {
+          const parts = entry.split(' | ').map(part => {
+            const [name, sig] = part.split(':');
+            const isBuy = sig && sig.includes('*');
+            const shortName = name.replace('_', '');
+            const sigClean = (sig || '').replace('*', '');
+            let color = 'var(--text2)'; let bg = 'transparent'; let border = '1px solid var(--border)';
+            if (isBuy) { color = 'var(--green)'; bg = 'var(--green-bg)'; border = '1px solid var(--green)'; }
+            else if (sigClean === 'BULLISH') { color = 'var(--blue)'; bg = 'var(--blue-bg)'; border = '1px solid var(--blue)'; }
+            else if (sigClean === 'BEARISH' || sigClean.includes('SELL')) { color = 'var(--red)'; bg = 'var(--red-bg)'; border = '1px solid var(--red)'; }
+            return `<span style="font-size:9px;padding:1px 4px;border-radius:3px;color:${color};background:${bg};border:${border};white-space:nowrap" title="${name}: ${sigClean}">${shortName}:${sigClean}${isBuy ? '*' : ''}</span>`;
+          }).join(' ');
+          const buyLabel = buyEntries.length > 1 ? `<span style="font-size:9px;color:var(--text2);margin-right:2px">Buy${idx+1}:</span>` : '';
+          return `<div style="display:flex;flex-wrap:wrap;gap:3px;align-items:center;${idx > 0 ? 'margin-top:4px;padding-top:4px;border-top:1px solid var(--border)' : ''}">${buyLabel}${parts}</div>`;
+        }).join('');
+      }
+
+      const ltpDisplay = ltp > 0 ? `₹${ltp.toFixed(2)}` : '<span style="color:var(--text2)">—</span>';
+      const cvDisplay = currentValue > 0 ? fmt(currentValue) : '—';
+      const upnlDisplay = unrealizedPnl !== null ? fmt(Math.round(unrealizedPnl)) : '—';
+      const upctDisplay = unrealizedPct !== null ? unrealizedPct.toFixed(1) + '%' : '—';
+
+      const rowId = `fp-row-${p.symbol.replace(/[^a-zA-Z0-9]/g, '')}`;
+      const hasFingerprint = !!p.signal_fingerprint;
+      const expandBtn = hasFingerprint
+        ? `<button class="btn sm" style="font-size:9px;padding:1px 5px;margin-left:4px" onclick="document.getElementById('${rowId}').style.display = document.getElementById('${rowId}').style.display === 'none' ? 'table-row' : 'none'">▼</button>`
+        : '';
+
+      html += `<tr>
+        <td><strong>${p.symbol}</strong></td>
+        <td>${p.net_quantity}</td>
+        <td>₹${p.avg_buy_price.toFixed(2)}</td>
+        <td>${ltpDisplay}</td>
+        <td>${fmt(p.total_invested)}</td>
+        <td>${cvDisplay}</td>
+        <td class="${unrealizedPnl > 0 ? 'pnl-positive' : unrealizedPnl < 0 ? 'pnl-negative' : ''}">${upnlDisplay}</td>
+        <td class="${unrealizedPct > 0 ? 'pnl-positive' : unrealizedPct < 0 ? 'pnl-negative' : ''}">${upctDisplay}</td>
+        <td>${toggleBtn}</td>
+        <td>${stratBadge}${expandBtn}</td>
+      </tr>`;
+      if (hasFingerprint) {
+        html += `<tr id="${rowId}" style="display:none"><td colspan="10" style="padding:6px 12px;background:var(--bg2);border-left:3px solid var(--blue)">
+          <div style="font-size:10px;color:var(--text2);margin-bottom:4px;font-weight:600">Entry Signal Fingerprint</div>
+          ${fpHtml}
+        </td></tr>`;
+      }
+    }
+    html += '</tbody></table>';
+
+    // Update stats with unrealized
+    if (totalCurrentValue > 0) {
+      document.getElementById('portStats').innerHTML = `
+        <div class="stat-card"><div class="label">Open Positions</div><div class="value blue">${open.length}</div></div>
+        <div class="stat-card"><div class="label">Invested</div><div class="value">${fmt(Math.round(totalInvested))}</div></div>
+        <div class="stat-card"><div class="label">Current Value</div><div class="value">${fmt(Math.round(totalCurrentValue))}</div></div>
+        <div class="stat-card"><div class="label">Unrealized P&L</div><div class="value ${pnlClass(totalUnrealized)}">${fmt(Math.round(totalUnrealized))} (${(totalUnrealized/totalInvested*100).toFixed(1)}%)</div></div>
+        <div class="stat-card"><div class="label">Realized P&L</div><div class="value ${pnlClass(portData.summary?.total_realized_pnl)}">${fmt(portData.summary?.total_realized_pnl)}</div></div>
+      `;
+    }
+
+    document.getElementById('portOpenBody').innerHTML = html;
+
+    // Hint: run equity scan first for LTP data
+    if (Object.keys(ltpMap).length === 0) {
+      document.getElementById('portOpenBody').innerHTML += '<div style="padding:8px;font-size:12px;color:var(--text2);text-align:center">Run Signal Scanner first to see live LTP & unrealized P&L</div>';
+    }
+  }
+
+  // Closed positions
+  const closed = portData.closed_positions || [];
+  if (closed.length === 0) {
+    document.getElementById('portClosedBody').innerHTML = '<div class="loading-overlay">No closed positions yet.</div>';
+  } else {
+    let html = `<table>
+      <thead><tr><th>Symbol</th><th>Buy Cost</th><th>Sell Revenue</th><th>P&L</th><th>P&L %</th><th>Note</th></tr></thead><tbody>`;
+    for (const p of closed) {
+      const pnlDisplay = p.realized_pnl != null ? fmt(p.realized_pnl) : '—';
+      const pctDisplay = p.pnl_pct != null ? fmt(p.pnl_pct) + '%' : '—';
+      const buyDisplay = p.total_buy_cost > 0 ? fmt(p.total_buy_cost) : '<span style="color:var(--text2)">unknown</span>';
+      const note = p.note ? `<span style="font-size:10px;color:var(--text2)">${p.note}</span>` : '';
+      html += `<tr>
+        <td><strong>${p.symbol}</strong></td>
+        <td>${buyDisplay}</td>
+        <td>${fmt(p.total_sell_revenue)}</td>
+        <td class="${pnlClass(p.realized_pnl)}">${pnlDisplay}</td>
+        <td class="${pnlClass(p.pnl_pct)}">${pctDisplay}</td>
+        <td>${note}</td>
+      </tr>`;
+    }
+    html += '</tbody></table>';
+    document.getElementById('portClosedBody').innerHTML = html;
+  }
+
+  // Trade history
+  if (tradeHistory.length === 0) {
+    document.getElementById('tradeHistoryBody').innerHTML = '<div class="loading-overlay">No trades recorded yet.</div>';
+  } else {
+    let html = `<table>
+      <thead><tr><th>ID</th><th>Date</th><th>Symbol</th><th>Action</th><th>Price</th><th>Qty</th><th>Value</th><th>Broker</th><th>Strategy</th><th></th></tr></thead><tbody>`;
+    for (const t of tradeHistory) {
+      const actionClass = t.action === 'BUY' ? 'pnl-positive' : 'pnl-negative';
+      const brokerBadge = t.broker && t.broker !== 'MANUAL' ? `<span style="font-size:10px;padding:1px 5px;border-radius:3px;background:var(--surface2);color:var(--text2)">${t.broker}</span>` : '';
+      const stratBadge = t.signal_strategy ? `<span style="font-size:10px;padding:1px 5px;border-radius:3px;background:var(--blue-bg);color:var(--blue)">${t.signal_strategy}</span>` : '';
+      html += `<tr>
+        <td style="color:var(--text2)">#${t.id}</td>
+        <td>${t.trade_date}</td>
+        <td><strong>${t.symbol}</strong></td>
+        <td class="${actionClass}" style="font-weight:600">${t.action}</td>
+        <td>${fmt(t.price)}</td>
+        <td>${t.quantity}</td>
+        <td>${fmt(t.price * t.quantity)}</td>
+        <td>${brokerBadge}</td>
+        <td>${stratBadge}</td>
+        <td>
+          <button class="btn-icon" onclick='openEditTdeModal(${JSON.stringify(t)})' title="Edit" style="font-size:14px;margin-right:4px">&#9998;</button>
+        </td>
+      </tr>`;
+    }
+    html += '</tbody></table>';
+    document.getElementById('tradeHistoryBody').innerHTML = html;
+  }
+}
+
+function openTradeModal() {
+  // Populate symbol dropdown from watchlist
+  const sel = document.getElementById('tradeSymbol');
+  const stocks = (wlData?.stocks || []).sort((a, b) => a.symbol.localeCompare(b.symbol));
+  sel.innerHTML = '<option value="">-- Select Stock --</option>' +
+    stocks.map(s => `<option value="${s.symbol}">${s.symbol} (${s.category})</option>`).join('');
+  document.getElementById('tradeModal').classList.add('open');
+}
+
+// Show/hide signal strategy dropdown based on portfolio selection
+document.addEventListener('change', (e) => {
+  if (e.target.id === 'tradePortfolio') {
+    document.getElementById('tradeSignalGroup').style.display = e.target.value === 'STRATEGY' ? '' : 'none';
+  }
+});
+
+async function recordTrade() {
+  const symbol = document.getElementById('tradeSymbol').value;
+  const action = document.getElementById('tradeAction').value;
+  const price = parseFloat(document.getElementById('tradePrice').value);
+  const quantity = parseInt(document.getElementById('tradeQty').value);
+  const trade_date = document.getElementById('tradeDate').value || undefined;
+  const broker = document.getElementById('tradeBroker').value;
+  const portfolio = document.getElementById('tradePortfolio').value;
+  const signal_strategy = portfolio === 'STRATEGY' ? document.getElementById('tradeSignalStrategy').value : undefined;
+
+  if (!symbol || !price || !quantity) { toast('Fill all required fields', 'error'); return; }
+
+  try {
+    const result = await api('/api/trade', {
+      method: 'POST',
+      body: JSON.stringify({ symbol, action, price, quantity, trade_date, broker, portfolio, signal_strategy }),
+    });
+    if (result.error) {
+      toast(result.error, 'error');
+    } else {
+      toast(`${action} ${quantity} x ${symbol} @ ${price} recorded`, 'success');
+      closeModal('tradeModal');
+      document.getElementById('tradeSymbol').value = '';
+      document.getElementById('tradePrice').value = '';
+      document.getElementById('tradeQty').value = '';
+      document.getElementById('tradeDate').value = '';
+      loadPositions();
+    }
+  } catch (e) {
+    toast('Record failed', 'error');
+  }
+}
+
+// ─── Edit / Delete Trade ───
+function openEditTdeModal(trade) {
+  document.getElementById('editTradeId').value = trade.id;
+  document.getElementById('editTradeSymbol').value = trade.symbol;
+  document.getElementById('editTradeAction').value = trade.action;
+  document.getElementById('editTradePrice').value = trade.price;
+  document.getElementById('editTradeQty').value = trade.quantity;
+  document.getElementById('editTradeDate').value = trade.trade_date;
+  document.getElementById('editTradeModal').classList.add('open');
+}
+
+async function saveEditTrade() {
+  const id = parseInt(document.getElementById('editTradeId').value);
+  const action = document.getElementById('editTradeAction').value;
+  const price = parseFloat(document.getElementById('editTradePrice').value);
+  const quantity = parseInt(document.getElementById('editTradeQty').value);
+  const trade_date = document.getElementById('editTradeDate').value;
+
+  if (!price || !quantity) { toast('Price and quantity are required', 'error'); return; }
+
+  try {
+    await api('/api/trade', {
+      method: 'PUT',
+      body: JSON.stringify({ id, action, price, quantity, trade_date }),
+    });
+    toast('Trade updated', 'success');
+    closeModal('editTradeModal');
+    loadPositions();
+  } catch (e) {
+    toast('Update failed', 'error');
+  }
+}
+
+async function deleteTrade() {
+  const id = parseInt(document.getElementById('editTradeId').value);
+  const symbol = document.getElementById('editTradeSymbol').value;
+  if (!confirm(`Delete trade #${id} for ${symbol}?`)) return;
+
+  try {
+    await api(`/api/trade?id=${id}`, { method: 'DELETE' });
+    toast(`Trade #${id} deleted`, 'success');
+    closeModal('editTradeModal');
+    loadPositions();
+  } catch (e) {
+    toast('Delete failed', 'error');
+  }
+}
+
+// Close modals on backdrop click
+document.querySelectorAll('.modal-backdrop').forEach(el => {
+  el.addEventListener('click', (e) => {
+    if (e.target === el) el.classList.remove('open');
+  });
+});
+
+// Close add dropdown on outside click
+document.addEventListener('click', (e) => {
+  if (!document.getElementById('addSearchSelect')?.contains(e.target)) {
+    document.getElementById('addDropdown')?.classList.remove('open');
+  }
+});
+
+// ─── Cache Status ───
+async function updateCacheStatus() {
+  try {
+    const data = await api('/api/cache/status');
+    const el = document.getElementById('cacheStatus');
+    if (!el) return;
+    const pct = data.total_watchlist > 0 ? Math.round(data.cached_stocks / data.total_watchlist * 100) : 0;
+    if (pct >= 95) {
+      el.innerHTML = `<span style="color:var(--green)">Cache: ${data.cached_stocks}/${data.total_watchlist}</span>`;
+    } else if (pct > 0) {
+      el.innerHTML = `<span style="color:var(--yellow)">Cache: ${data.cached_stocks}/${data.total_watchlist}</span>`;
+    } else {
+      el.innerHTML = `<span style="color:var(--red)">Cache: empty</span>`;
+    }
+    el.title = `${data.total_candles} candles cached. Latest: ${data.latest_date || 'none'}. Click scan to build.`;
+  } catch {}
+}
+
+// ─── F&O Positions ───
+
+async function syncFnoFromContractNotes() {
+  toast('Syncing F&O trades from contract notes...', 'info');
+  try {
+    const res = await api('/api/fno/sync', { method: 'POST' });
+    if (res.success) {
+      toast('Sync complete! Refreshing positions...', 'success');
+      loadFnoPositions();
+    } else {
+      toast(res.error || 'Sync failed', 'error');
+    }
+  } catch (e) {
+    toast('Sync server not running. Start: python3 scripts/sync_server.py', 'error');
+  }
+}
+
+function openFnoTradeModal() { document.getElementById('fnoTradeModal').classList.add('open'); }
+function closeFnoTradeModal() { document.getElementById('fnoTradeModal').classList.remove('open'); }
+
+async function submitFnoTrade() {
+  const body = {
+    underlying: document.getElementById('fnoUnd').value,
+    expiry: document.getElementById('fnoExpiry').value,
+    strike: parseInt(document.getElementById('fnoStrike').value),
+    option_type: document.getElementById('fnoType').value,
+    action: document.getElementById('fnoAction').value,
+    price: parseFloat(document.getElementById('fnoPrice').value),
+    lots: parseInt(document.getElementById('fnoLots').value) || 1,
+    strategy: document.getElementById('fnoStrategy').value,
+    broker: document.getElementById('fnoBroker').value,
+    position_id: document.getElementById('fnoPosId').value || undefined,
+  };
+  if (!body.expiry || !body.strike || !body.price) { toast('Fill all required fields', 'error'); return; }
+  try {
+    const res = await api('/api/fno/trade', { method: 'POST', body: JSON.stringify(body) });
+    if (res.success) { toast('Trade recorded!', 'success'); closeFnoTradeModal(); loadFnoPositions(); }
+    else toast('Error: ' + (res.error || 'unknown'), 'error');
+  } catch (e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function loadFnoPositions() {
+  const body = document.getElementById('fnoPositionsBody');
+  body.innerHTML = '<div class="loading-overlay"><span class="spinner"></span> Fetching live prices...</div>';
+  try {
+    const data = await api('/api/fno/positions');
+    if (!data.positions || data.positions.length === 0) {
+      body.innerHTML = '<div class="loading-overlay">No open F&O positions. Click "+ Add Trade" to record one.</div>';
+      return;
+    }
+    let html = '';
+    for (const pos of data.positions) {
+      const adviceClass = pos.advice.includes('EXIT') ? (pos.advice.includes('Target') ? 'pnl-positive' : 'pnl-negative') : pos.advice.includes('HOLD') ? '' : 'pnl-negative';
+      const pnlClass2 = pos.combined_pnl > 0 ? 'pnl-positive' : pos.combined_pnl < 0 ? 'pnl-negative' : '';
+      const stratBadge = pos.strategy === 'deep_otm_perleg' ? '<span style="font-size:10px;padding:2px 6px;border-radius:3px;background:var(--green-bg);color:var(--green)">Deep OTM</span>'
+        : pos.strategy === 'short_straddle' ? '<span style="font-size:10px;padding:2px 6px;border-radius:3px;background:var(--blue-bg);color:var(--blue)">Straddle</span>'
+        : '<span style="font-size:10px;padding:2px 6px;border-radius:3px;background:var(--surface2);color:var(--text2)">Manual</span>';
+
+      html += `<div style="border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;background:var(--surface)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div>
+            ${stratBadge}
+            <span style="font-weight:600;margin-left:8px">${pos.underlying} ${pos.expiry}</span>
+            <span style="color:var(--text2);font-size:12px;margin-left:8px">DTE ${pos.dte}</span>
+          </div>
+          <div style="text-align:right">
+            <span class="${pnlClass2}" style="font-size:18px;font-weight:700">₹${pos.combined_pnl.toLocaleString()}</span>
+          </div>
+        </div>
+        <div style="padding:8px;border-radius:6px;margin-bottom:8px;font-size:13px;font-weight:600;${pos.advice.includes('EXIT') ? 'background:var(--red-bg);color:var(--red)' : pos.advice.includes('Target') ? 'background:var(--green-bg);color:var(--green)' : 'background:var(--surface2);color:var(--text)'}">
+          ${pos.advice}
+        </div>
+        <table style="width:100%;font-size:12px">
+          <thead><tr><th>Strike</th><th>Type</th><th>Action</th><th>Entry</th><th>Current</th><th>P&L</th><th>Change</th>${pos.strategy === 'deep_otm_perleg' ? '<th>Leg Advice</th>' : ''}<th></th></tr></thead>
+          <tbody>`;
+
+      for (const leg of pos.legs) {
+        const legPnlClass = leg.pnl > 0 ? 'pnl-positive' : leg.pnl < 0 ? 'pnl-negative' : '';
+        html += `<tr>
+          <td style="font-weight:600">${leg.strike}</td>
+          <td>${leg.option_type}</td>
+          <td>${leg.action}</td>
+          <td>₹${leg.entry_price}</td>
+          <td>₹${leg.current_price}</td>
+          <td class="${legPnlClass}">₹${leg.pnl.toLocaleString()}</td>
+          <td class="${leg.change_pct > 0 ? 'pnl-negative' : 'pnl-positive'}">${leg.change_pct > 0 ? '+' : ''}${leg.change_pct}%</td>
+          ${pos.strategy === 'deep_otm_perleg' ? `<td style="font-size:11px">${leg.advice}</td>` : ''}
+          <td><button class="btn sm danger" onclick="closeFnoLeg(${leg.id}, ${leg.current_price})">Close</button></td>
+        </tr>`;
+      }
+      html += '</tbody></table></div>';
+    }
+    body.innerHTML = html;
+  } catch (e) {
+    body.innerHTML = '<div class="loading-overlay">Error loading positions: ' + e.message + '</div>';
+  }
+}
+
+async function closeFnoLeg(id, currentPrice) {
+  const reason = prompt('Exit reason (target/sl/time_exit/manual):', 'manual');
+  if (!reason) return;
+  const price = prompt('Exit price:', currentPrice);
+  if (!price) return;
+  try {
+    await api('/api/fno/close', { method: 'POST', body: JSON.stringify({ id, exit_price: parseFloat(price), exit_reason: reason }) });
+    toast('Position closed', 'success');
+    loadFnoPositions();
+  } catch (e) { toast('Error: ' + e.message, 'error'); }
+}
+
+// ─── F&O Scanner ───
+let fnoUnderlying = 'NIFTY';
+let fnoData = null;
+
+function setFnoUnderlying(u) {
+  fnoUnderlying = u;
+  document.querySelectorAll('#fnoUnderlying .pill').forEach(p => p.classList.toggle('active', p.textContent === u));
+}
+
+async function runFnoScan() {
+  // Check auth first
+  try {
+    const auth = await api('/api/auth');
+    if (auth.status !== 'VALID') {
+      toast('⚠️ Upstox token expired! Click the auth badge (top-right) to re-authenticate.', 'error');
+      return;
+    }
+  } catch {}
+
+  const btn = document.getElementById('fnoScanBtn');
+  btn.innerHTML = '<span class="spinner"></span> Scanning...';
+  btn.disabled = true;
+  document.getElementById('fnoSignals').innerHTML = '<tr><td colspan="8" class="loading-overlay"><span class="spinner"></span> Fetching live option chain...</td></tr>';
+
+  try {
+    fnoData = await api(`/api/fno/scan?underlying=${fnoUnderlying}`);
+    if (fnoData.error) { toast('F&O scan error: ' + fnoData.error, 'error'); return; }
+    renderFnoResults();
+    document.getElementById('fnoLastScan').textContent = `Last scan: ${new Date().toLocaleTimeString()}`;
+  } catch (e) {
+    toast('F&O scan failed: ' + e.message, 'error');
+  } finally {
+    btn.innerHTML = 'Scan Now';
+    btn.disabled = false;
+  }
+}
+
+function renderFnoResults() {
+  if (!fnoData) return;
+  const d = fnoData;
+
+  // Stats bar
+  const vixColor = d.vix < 15 ? 'green' : d.vix < 20 ? 'blue' : d.vix < 25 ? 'yellow' : 'red';
+  const viewColor = d.marketView === 'BULLISH' ? 'green' : d.marketView === 'BEARISH' ? 'red' : 'blue';
+  document.getElementById('fnoStats').innerHTML = `
+    <div class="stat-card"><div class="label">${d.underlying} Spot</div><div class="value blue">${fmt(d.spotPrice)}</div></div>
+    <div class="stat-card"><div class="label">VIX (ATM IV)</div><div class="value ${vixColor}">${d.vix}%</div></div>
+    <div class="stat-card"><div class="label">PCR</div><div class="value ${viewColor}">${d.pcr} (${d.marketView})</div></div>
+    <div class="stat-card"><div class="label">Max Pain</div><div class="value">${fmt(d.maxPainStrike)}</div></div>
+    <div class="stat-card"><div class="label">Support / Resistance</div><div class="value">${fmt(d.support)} / ${fmt(d.resistance)}</div></div>
+    <div class="stat-card"><div class="label">DTE (Expiry ${d.expiry})</div><div class="value">${d.dte} days</div></div>
+  `;
+
+  // Signals
+  const tbody = document.getElementById('fnoSignals');
+  if (!d.signals || d.signals.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--text2)">No signals right now. Market conditions don\'t match any strategy.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = d.signals.map(s => {
+    const confClass = s.confidence === 'HIGH' ? 'signal FRESH_BUY' : s.confidence === 'MEDIUM' ? 'signal BULLISH' : 'signal NEUTRAL';
+    const actionClass = s.action === 'SELL' ? 'signal FRESH_SELL' : s.action === 'BUY' ? 'signal FRESH_BUY' : 'signal NEUTRAL';
+    return `<tr>
+      <td style="font-weight:600;min-width:140px">${s.strategy}</td>
+      <td><span class="${actionClass}">${s.action}</span></td>
+      <td><span class="${confClass}">${s.confidence}</span></td>
+      <td style="font-size:12px;min-width:180px;white-space:normal">${s.entry}</td>
+      <td style="font-size:12px;color:var(--green);min-width:160px;white-space:normal">${s.target}</td>
+      <td style="font-size:12px;color:var(--red);min-width:160px;white-space:normal">${s.sl}</td>
+      <td style="font-size:12px;color:var(--yellow);min-width:160px;white-space:normal">${s.exitRule}</td>
+      <td style="font-size:11px;color:var(--text2);min-width:180px;white-space:normal">${s.reason}${s.backtest ? '<br><span style="color:var(--green);font-size:10px">📊 ' + s.backtest + '</span>' : ''}</td>
+    </tr>`;
+  }).join('');
+
+  // OI Chain
+  const chainBody = document.getElementById('fnoChain');
+  if (d.chainSummary) {
+    chainBody.innerHTML = d.chainSummary.map(s => {
+      const isAtm = s.strike === d.atmStrike;
+      const isSupport = s.strike === d.support;
+      const isResistance = s.strike === d.resistance;
+      const isMaxPain = s.strike === d.maxPainStrike;
+      const rowStyle = isAtm ? 'background:var(--blue-bg)' : '';
+      const label = [isAtm && 'ATM', isSupport && 'SUP', isResistance && 'RES', isMaxPain && 'MP'].filter(Boolean).join(' ');
+
+      return `<tr style="${rowStyle}">
+        <td style="font-weight:${isAtm ? '700' : '400'}">${s.strike} ${label ? `<span style="font-size:10px;color:var(--yellow)">${label}</span>` : ''}</td>
+        <td style="color:${s.callOI > d.totalCallOI * 0.05 ? 'var(--red)' : 'var(--text2)'}">${(s.callOI / 1000).toFixed(0)}K</td>
+        <td style="color:${s.putOI > d.totalPutOI * 0.05 ? 'var(--green)' : 'var(--text2)'}">${(s.putOI / 1000).toFixed(0)}K</td>
+        <td>${s.callPrice > 0 ? '₹' + s.callPrice.toFixed(1) : '-'}</td>
+        <td>${s.putPrice > 0 ? '₹' + s.putPrice.toFixed(1) : '-'}</td>
+        <td>${s.callIV > 0 ? s.callIV.toFixed(1) + '%' : '-'}</td>
+        <td>${s.putIV > 0 ? s.putIV.toFixed(1) + '%' : '-'}</td>
+      </tr>`;
+    }).join('');
+  }
+}
+
+// ─── Init ───
+checkAuth();
+loadStockMaster();
+loadWatchlist();
+updateCacheStatus();
+
+// Auto-check auth every 30 minutes — warn if token expires
+setInterval(async () => {
+  try {
+    const auth = await api('/api/auth');
+    if (auth.status !== 'VALID') {
+      document.getElementById('authBadge').className = 'auth-badge expired';
+      document.getElementById('authText').textContent = 'Token Expired — click to login';
+      toast('⚠️ Upstox token expired! Click the auth badge to re-authenticate.', 'error');
+    }
+  } catch {}
+}, 30 * 60 * 1000);
+</script>
+</body>
+</html>

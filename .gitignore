@@ -167,3 +167,12 @@ junit.xml
 worker/
 workers-site/
 wrangler.toml.bak
+.env.breeze
+
+# Secrets
+scripts/credentials.json
+scripts/token.json
+
+# Large data files
+backtester/scripts/candles_2012/
+backtester/scripts/results/

@@ -1,0 +1,1932 @@
+{
+  "ABB": {
+    "key": "NSE_EQ|INE117A01022",
+    "name": "ABB India Ltd.",
+    "category": "LARGECAP"
+  },
+  "ASIANPAINT": {
+    "key": "NSE_EQ|INE021A01026",
+    "name": "Asian Paints Ltd.",
+    "category": "LARGECAP"
+  },
+  "EIHOTEL": {
+    "key": "NSE_EQ|INE230A01023",
+    "name": "East India Hotels Ltd",
+    "category": "LARGECAP"
+  },
+  "GLAXO": {
+    "key": "NSE_EQ|INE159A01016",
+    "name": "Glaxo (India) Ltd.",
+    "category": "LARGECAP"
+  },
+  "M&M": {
+    "key": "NSE_EQ|INE101A01026",
+    "name": "Mahindra & Mahindra Ltd.",
+    "category": "LARGECAP"
+  },
+  "NESTLEIND": {
+    "key": "NSE_EQ|INE239A01024",
+    "name": "Nestle India Limited",
+    "category": "LARGECAP"
+  },
+  "CHAMBLFERT": {
+    "key": "NSE_EQ|INE085A01013",
+    "name": "Chambal Fertilizers & Chemicals Ltd.",
+    "category": "LARGECAP"
+  },
+  "HEROMOTOCO": {
+    "key": "NSE_EQ|INE158A01026",
+    "name": "Hero Honda Motors Limited",
+    "category": "LARGECAP"
+  },
+  "APOLLOTYRE": {
+    "key": "NSE_EQ|INE438A01022",
+    "name": "Apollo Tyres Ltd.",
+    "category": "LARGECAP"
+  },
+  "NAGAFERT": {
+    "key": "NSE_EQ|INE454M01024",
+    "name": "Nagarjuna Fertilizers & Chemicals Ltd.",
+    "category": "LARGECAP"
+  },
+  "MTNL": {
+    "key": "NSE_EQ|INE153A01019",
+    "name": "Mahanagar Telephone Nigam Ltd.",
+    "category": "LARGECAP"
+  },
+  "BHEL": {
+    "key": "NSE_EQ|INE257A01026",
+    "name": "Bharat Heavy Electricals Ltd.",
+    "category": "LARGECAP"
+  },
+  "HINDPETRO": {
+    "key": "NSE_EQ|INE094A01015",
+    "name": "Hindustan Petroleum Corporation Ltd.",
+    "category": "LARGECAP"
+  },
+  "DRREDDY": {
+    "key": "NSE_EQ|INE089A01031",
+    "name": "Dr. Reddy's Laboratories Ltd.",
+    "category": "LARGECAP"
+  },
+  "BPCL": {
+    "key": "NSE_EQ|INE029A01011",
+    "name": "Bharat Petroleum Corporation Ltd.",
+    "category": "LARGECAP"
+  },
+  "BANKINDIA": {
+    "key": "NSE_EQ|INE084A01016",
+    "name": "Bank of India",
+    "category": "LARGECAP"
+  },
+  "CIPLA": {
+    "key": "NSE_EQ|INE059A01026",
+    "name": "Cipla Ltd.",
+    "category": "LARGECAP"
+  },
+  "INFY": {
+    "key": "NSE_EQ|INE009A01021",
+    "name": "Infosys Technologies Limited",
+    "category": "LARGECAP"
+  },
+  "NIITLTD": {
+    "key": "NSE_EQ|INE161A01038",
+    "name": "NIIT Ltd.",
+    "category": "LARGECAP"
+  },
+  "PGHH": {
+    "key": "NSE_EQ|INE179A01014",
+    "name": "Procter & Gamble India Ltd.",
+    "category": "LARGECAP"
+  },
+  "THERMAX": {
+    "key": "NSE_EQ|INE152A01029",
+    "name": "Thermax Ltd.",
+    "category": "LARGECAP"
+  },
+  "ASHOKLEY": {
+    "key": "NSE_EQ|INE208A01029",
+    "name": "Ashok Leyland Ltd.",
+    "category": "LARGECAP"
+  },
+  "MRPL": {
+    "key": "NSE_EQ|INE103A01014",
+    "name": "Mangalore Refinery & Petrochemicals Ltd.",
+    "category": "LARGECAP"
+  },
+  "GESHIP": {
+    "key": "NSE_EQ|INE017A01032",
+    "name": "Great Eastern Shipping Company Limited.",
+    "category": "LARGECAP"
+  },
+  "RCOM": {
+    "key": "NSE_EQ|INE330H01018",
+    "name": "Reliance Capital Ltd.",
+    "category": "LARGECAP"
+  },
+  "BRITANNIA": {
+    "key": "NSE_EQ|INE216A01030",
+    "name": "Britannia Industries Ltd.",
+    "category": "LARGECAP"
+  },
+  "DABUR": {
+    "key": "NSE_EQ|INE016A01026",
+    "name": "Dabur India Ltd.",
+    "category": "LARGECAP"
+  },
+  "HCL-INSYS": {
+    "key": "NSE_EQ|INE236A01020",
+    "name": "HCL Infosystems Ltd.",
+    "category": "LARGECAP"
+  },
+  "ZEEL": {
+    "key": "NSE_EQ|INE256A01028",
+    "name": "Zee Telefilms Ltd",
+    "category": "LARGECAP"
+  },
+  "SUNPHARMA": {
+    "key": "NSE_EQ|INE044A01036",
+    "name": "Sun Pharmaceutical Industries Ltd.",
+    "category": "LARGECAP"
+  },
+  "WIPRO": {
+    "key": "NSE_EQ|INE075A01022",
+    "name": "Wipro Ltd.",
+    "category": "LARGECAP"
+  },
+  "ICICIBANK": {
+    "key": "NSE_EQ|INE090A01021",
+    "name": "ICICI Bank Ltd.",
+    "category": "LARGECAP"
+  },
+  "SCI": {
+    "key": "NSE_EQ|INE109A01011",
+    "name": "Shipping Corporation of India Ltd.",
+    "category": "LARGECAP"
+  },
+  "HCLTECH": {
+    "key": "NSE_EQ|INE860A01027",
+    "name": "HCL Technologies Ltd.",
+    "category": "LARGECAP"
+  },
+  "GAIL": {
+    "key": "NSE_EQ|INE129A01019",
+    "name": "Gas Authority of India Limited",
+    "category": "LARGECAP"
+  },
+  "NATIONALUM": {
+    "key": "NSE_EQ|INE139A01034",
+    "name": "National Aluminium Co. Ltd.",
+    "category": "LARGECAP"
+  },
+  "CASTROLIND": {
+    "key": "NSE_EQ|INE172A01027",
+    "name": "Castrol (India) Ltd.",
+    "category": "LARGECAP"
+  },
+  "SAIL": {
+    "key": "NSE_EQ|INE114A01011",
+    "name": "Steel Authority of India Ltd.",
+    "category": "LARGECAP"
+  },
+  "BHARTIARTL": {
+    "key": "NSE_EQ|INE397D01024",
+    "name": "Bharti Tele-Ventures Ltd.",
+    "category": "LARGECAP"
+  },
+  "MARUTI": {
+    "key": "NSE_EQ|INE585B01010",
+    "name": "Maruti Udyog Limited",
+    "category": "LARGECAP"
+  },
+  "ONGC": {
+    "key": "NSE_EQ|INE213A01029",
+    "name": "Oil & Natural Gas Corporation Ltd.",
+    "category": "LARGECAP"
+  },
+  "PNB": {
+    "key": "NSE_EQ|INE160A01022",
+    "name": "Punjab National Bank",
+    "category": "LARGECAP"
+  },
+  "LT": {
+    "key": "NSE_EQ|INE018A01030",
+    "name": "Larsen & Toubro Ltd.",
+    "category": "LARGECAP"
+  },
+  "TCS": {
+    "key": "NSE_EQ|INE467B01029",
+    "name": "Tata Consultancy Services Ltd.",
+    "category": "LARGECAP"
+  },
+  "INDHOTEL": {
+    "key": "NSE_EQ|INE053A01029",
+    "name": "Indian Hotels Co. Ltd.",
+    "category": "LARGECAP"
+  },
+  "COLPAL": {
+    "key": "NSE_EQ|INE259A01022",
+    "name": "Colgate Palmolive (I) Ltd",
+    "category": "LARGECAP"
+  },
+  "SUZLON": {
+    "key": "NSE_EQ|INE040H01021",
+    "name": "Suzlon Energy Ltd.",
+    "category": "LARGECAP"
+  },
+  "SIEMENS": {
+    "key": "NSE_EQ|INE003A01024",
+    "name": "Siemens Ltd.",
+    "category": "LARGECAP"
+  },
+  "TATACHEM": {
+    "key": "NSE_EQ|INE092A01019",
+    "name": "Tata Chemicals Ltd.",
+    "category": "LARGECAP"
+  },
+  "VEDL": {
+    "key": "NSE_EQ|INE205A01025",
+    "name": "Sterlite Industries (India) Ltd.",
+    "category": "LARGECAP"
+  },
+  "NTPC": {
+    "key": "NSE_EQ|INE733E01010",
+    "name": "NTPC Ltd.",
+    "category": "LARGECAP"
+  },
+  "UNITECH": {
+    "key": "NSE_EQ|INE694A01020",
+    "name": "Unitech Ltd.",
+    "category": "LARGECAP"
+  },
+  "IDEA": {
+    "key": "NSE_EQ|INE669E01016",
+    "name": "Idea Cellular Ltd.",
+    "category": "LARGECAP"
+  },
+  "DLF": {
+    "key": "NSE_EQ|INE271C01023",
+    "name": "DLF Ltd.",
+    "category": "LARGECAP"
+  },
+  "POWERGRID": {
+    "key": "NSE_EQ|INE752E01010",
+    "name": "Power Grid Corporation of India Ltd.",
+    "category": "LARGECAP"
+  },
+  "BAJAJ-AUTO": {
+    "key": "NSE_EQ|INE917I01010",
+    "name": "Bajaj Auto Ltd",
+    "category": "LARGECAP"
+  },
+  "RPOWER": {
+    "key": "NSE_EQ|INE614G01033",
+    "name": "Reliance Power Ltd.",
+    "category": "LARGECAP"
+  },
+  "AXISBANK": {
+    "key": "NSE_EQ|INE238A01034",
+    "name": "Axis Bank Ltd.",
+    "category": "LARGECAP"
+  },
+  "JINDALSTEL": {
+    "key": "NSE_EQ|INE749A01030",
+    "name": "Jindal Steel & Power Ltd.",
+    "category": "LARGECAP"
+  },
+  "TATACOMM": {
+    "key": "NSE_EQ|INE151A01013",
+    "name": "Tata Communications Ltd.",
+    "category": "LARGECAP"
+  },
+  "KOTAKBANK": {
+    "key": "NSE_EQ|INE237A01036",
+    "name": "Kotak Mahindra Bank Ltd.",
+    "category": "LARGECAP"
+  },
+  "GRASIM": {
+    "key": "NSE_EQ|INE047A01021",
+    "name": "Grasim Industries Ltd.",
+    "category": "LARGECAP"
+  },
+  "COALINDIA": {
+    "key": "NSE_EQ|INE522F01014",
+    "name": "Coal India Ltd.",
+    "category": "LARGECAP"
+  },
+  "BANKBARODA": {
+    "key": "NSE_EQ|INE028A01039",
+    "name": "Bank of Baroda",
+    "category": "LARGECAP"
+  },
+  "LUPIN": {
+    "key": "NSE_EQ|INE326A01037",
+    "name": "Lupin Ltd.",
+    "category": "LARGECAP"
+  },
+  "ULTRACEMCO": {
+    "key": "NSE_EQ|INE481G01011",
+    "name": "UltraTech Cement Ltd.",
+    "category": "LARGECAP"
+  },
+  "INDUSINDBK": {
+    "key": "NSE_EQ|INE095A01012",
+    "name": "IndusInd Bank Ltd.",
+    "category": "LARGECAP"
+  },
+  "NMDC": {
+    "key": "NSE_EQ|INE584A01023",
+    "name": "NMDC Ltd.",
+    "category": "LARGECAP"
+  },
+  "RELINFRA": {
+    "key": "NSE_EQ|INE036A01016",
+    "name": "Reliance Infrastructure Ltd.",
+    "category": "LARGECAP"
+  },
+  "TECHM": {
+    "key": "NSE_EQ|INE669C01036",
+    "name": "Tech Mahindra Ltd.",
+    "category": "LARGECAP"
+  },
+  "UNITDSPR": {
+    "key": "NSE_EQ|INE854D01024",
+    "name": "United Spirits Ltd.",
+    "category": "LARGECAP"
+  },
+  "YESBANK": {
+    "key": "NSE_EQ|INE528G01035",
+    "name": "Yes Bank Ltd.",
+    "category": "LARGECAP"
+  },
+  "BOSCHLTD": {
+    "key": "NSE_EQ|INE323A01026",
+    "name": "Bosch Ltd.",
+    "category": "LARGECAP"
+  },
+  "ADANIPORTS": {
+    "key": "NSE_EQ|INE742F01042",
+    "name": "Adani Ports and Special Economic Zone Ltd.",
+    "category": "LARGECAP"
+  },
+  "AUROPHARMA": {
+    "key": "NSE_EQ|INE406A01037",
+    "name": "Aurobindo Pharma Ltd.",
+    "category": "LARGECAP"
+  },
+  "EICHERMOT": {
+    "key": "NSE_EQ|INE066A01021",
+    "name": "Eicher Motors Ltd.",
+    "category": "LARGECAP"
+  },
+  "TMPV": {
+    "key": "NSE_EQ|INE155A01022",
+    "name": "Tata Motors Ltd DVR",
+    "category": "LARGECAP"
+  },
+  "IOC": {
+    "key": "NSE_EQ|INE242A01010",
+    "name": "Indian Oil Corporation Ltd.",
+    "category": "LARGECAP"
+  },
+  "ACC": {
+    "key": "NSE_EQ|INE012A01025",
+    "name": "ACC Ltd.",
+    "category": "LARGECAP"
+  },
+  "BAJFINANCE": {
+    "key": "NSE_EQ|INE296A01032",
+    "name": "Bajaj Finance Ltd.",
+    "category": "LARGECAP"
+  },
+  "UPL": {
+    "key": "NSE_EQ|INE628A01036",
+    "name": "UPL Ltd.",
+    "category": "LARGECAP"
+  },
+  "AMBUJACEM": {
+    "key": "NSE_EQ|INE079A01024",
+    "name": "Ambuja Cements Ltd.",
+    "category": "LARGECAP"
+  },
+  "BAJAJFINSV": {
+    "key": "NSE_EQ|INE918I01026",
+    "name": "Bajaj Finserv Ltd.",
+    "category": "LARGECAP"
+  },
+  "TITAN": {
+    "key": "NSE_EQ|INE280A01028",
+    "name": "Titan Company Ltd.",
+    "category": "LARGECAP"
+  },
+  "JSWSTEEL": {
+    "key": "NSE_EQ|INE019A01038",
+    "name": "JSW Steel Ltd.",
+    "category": "LARGECAP"
+  },
+  "SHREECEM": {
+    "key": "NSE_EQ|INE070A01015",
+    "name": "Shree Cement Ltd.",
+    "category": "LARGECAP"
+  },
+  "HDFCLIFE": {
+    "key": "NSE_EQ|INE795G01014",
+    "name": "HDFC Life Insurance Company Ltd.",
+    "category": "LARGECAP"
+  },
+  "WOCKPHARMA": {
+    "key": "NSE_EQ|INE049B01025",
+    "name": "Wockhardt Ltd.",
+    "category": "LARGECAP"
+  },
+  "HFCL": {
+    "key": "NSE_EQ|INE548A01028",
+    "name": "Himachal Futuristic Communications Ltd",
+    "category": "LARGECAP"
+  },
+  "AHLEAST": {
+    "key": "NSE_EQ|INE926K01017",
+    "name": "Asian Hotels Ltd. - Hotels",
+    "category": "LARGECAP"
+  },
+  "INDIACEM": {
+    "key": "NSE_EQ|INE383A01012",
+    "name": "India Cements Ltd. - Cement & Cement Products",
+    "category": "LARGECAP"
+  },
+  "FINCABLES": {
+    "key": "NSE_EQ|INE235A01022",
+    "name": "Finolex Cables Ltd. - Cables - Telecom",
+    "category": "LARGECAP"
+  },
+  "GTL": {
+    "key": "NSE_EQ|INE043A01012",
+    "name": "GTL Ltd (Global Telesytems Ltd)",
+    "category": "LARGECAP"
+  },
+  "MOREPENLAB": {
+    "key": "NSE_EQ|INE083A01026",
+    "name": "Morepen Laboratories Ltd.",
+    "category": "LARGECAP"
+  },
+  "APTECHT": {
+    "key": "NSE_EQ|INE266F01018",
+    "name": "Aptech Ltd.",
+    "category": "LARGECAP"
+  },
+  "BATAINDIA": {
+    "key": "NSE_EQ|INE176A01028",
+    "name": "Bata India Ltd.",
+    "category": "LARGECAP"
+  },
+  "BOMDYEING": {
+    "key": "NSE_EQ|INE032A01023",
+    "name": "Bombay Dyeing & Mnfg Co. Ltd.",
+    "category": "LARGECAP"
+  },
+  "BEL": {
+    "key": "NSE_EQ|INE263A01024",
+    "name": "Bharat Electronics Ltd.",
+    "category": "LARGECAP"
+  },
+  "CUMMINSIND": {
+    "key": "NSE_EQ|INE298A01020",
+    "name": "Cummins India Ltd.",
+    "category": "LARGECAP"
+  },
+  "HINDZINC": {
+    "key": "NSE_EQ|INE267A01025",
+    "name": "Hindustan Zinc Ltd.",
+    "category": "LARGECAP"
+  },
+  "CONCOR": {
+    "key": "NSE_EQ|INE111A01025",
+    "name": "Container Corporation of India Ltd.",
+    "category": "LARGECAP"
+  },
+  "OFSS": {
+    "key": "NSE_EQ|INE881D01027",
+    "name": "I-Flex Sloution Ltd.",
+    "category": "LARGECAP"
+  },
+  "ABBOTINDIA": {
+    "key": "NSE_EQ|INE358A01014",
+    "name": "Abbott India Ltd.",
+    "category": "LARGECAP"
+  },
+  "TVSMOTOR": {
+    "key": "NSE_EQ|INE494B01023",
+    "name": "TVS Motor Co Ltd.",
+    "category": "LARGECAP"
+  },
+  "MPHASIS": {
+    "key": "NSE_EQ|INE356A01018",
+    "name": "Mphasis BFL Ltd.",
+    "category": "LARGECAP"
+  },
+  "GILLETTE": {
+    "key": "NSE_EQ|INE322A01010",
+    "name": "Gillette India Ltd.",
+    "category": "LARGECAP"
+  },
+  "UNIONBANK": {
+    "key": "NSE_EQ|INE692A01016",
+    "name": "Union Bank of India Ltd.",
+    "category": "LARGECAP"
+  },
+  "THOMASCOOK": {
+    "key": "NSE_EQ|INE332A01027",
+    "name": "Thomas Cook (India) Ltd.",
+    "category": "LARGECAP"
+  },
+  "CANBK": {
+    "key": "NSE_EQ|INE476A01022",
+    "name": "Canara Bank",
+    "category": "LARGECAP"
+  },
+  "BHARATFORG": {
+    "key": "NSE_EQ|INE465A01025",
+    "name": "Bharat Forge Ltd.",
+    "category": "LARGECAP"
+  },
+  "ZYDUSLIFE": {
+    "key": "NSE_EQ|INE010B01027",
+    "name": "Cadila Healthcare Ltd.",
+    "category": "LARGECAP"
+  },
+  "IOB": {
+    "key": "NSE_EQ|INE565A01014",
+    "name": "Indian Overseas Bank",
+    "category": "LARGECAP"
+  },
+  "BIOCON": {
+    "key": "NSE_EQ|INE376G01013",
+    "name": "Biocon Ltd.",
+    "category": "LARGECAP"
+  },
+  "INGERRAND": {
+    "key": "NSE_EQ|INE177A01018",
+    "name": "Ingersoll Rand (India) Ltd.",
+    "category": "LARGECAP"
+  },
+  "ABCAPITAL": {
+    "key": "NSE_EQ|INE674K01013",
+    "name": "Aditya Birla Nuvo Ltd.",
+    "category": "LARGECAP"
+  },
+  "PFC": {
+    "key": "NSE_EQ|INE134E01011",
+    "name": "Power Finance Corporation Ltd.",
+    "category": "LARGECAP"
+  },
+  "PFIZER": {
+    "key": "NSE_EQ|INE182A01018",
+    "name": "Pfizer Ltd.",
+    "category": "LARGECAP"
+  },
+  "HDIL": {
+    "key": "NSE_EQ|INE191I01012",
+    "name": "Housing Development and Infrastructure Ltd.",
+    "category": "LARGECAP"
+  },
+  "GLENMARK": {
+    "key": "NSE_EQ|INE935A01035",
+    "name": "Glenmark Pharmaceuticals Ltd.",
+    "category": "LARGECAP"
+  },
+  "ADANIENT": {
+    "key": "NSE_EQ|INE423A01024",
+    "name": "Adani Enterprises Ltd.",
+    "category": "LARGECAP"
+  },
+  "CHENNPETRO": {
+    "key": "NSE_EQ|INE178A01016",
+    "name": "Chennai Petroleum Corporation Ltd.",
+    "category": "LARGECAP"
+  },
+  "CROMPTON": {
+    "key": "NSE_EQ|INE299U01018",
+    "name": "Crompton Greaves Ltd.",
+    "category": "LARGECAP"
+  },
+  "FEDERALBNK": {
+    "key": "NSE_EQ|INE171A01029",
+    "name": "Federal Bank Ltd.",
+    "category": "LARGECAP"
+  },
+  "RAYMOND": {
+    "key": "NSE_EQ|INE301A01014",
+    "name": "Raymond Ltd.",
+    "category": "LARGECAP"
+  },
+  "TORNTPOWER": {
+    "key": "NSE_EQ|INE813H01021",
+    "name": "Torrent Power Ltd.",
+    "category": "LARGECAP"
+  },
+  "RECLTD": {
+    "key": "NSE_EQ|INE020B01018",
+    "name": "Rural Electrification Corporation Ltd.",
+    "category": "LARGECAP"
+  },
+  "SHRIRAMFIN": {
+    "key": "NSE_EQ|INE721A01047",
+    "name": "Shriram Transport Finance Co. Ltd.",
+    "category": "LARGECAP"
+  },
+  "TTML": {
+    "key": "NSE_EQ|INE517B01013",
+    "name": "Tata Teleservices (Maharashtra) Ltd.",
+    "category": "LARGECAP"
+  },
+  "EXIDEIND": {
+    "key": "NSE_EQ|INE302A01020",
+    "name": "Exide Industries Ltd.",
+    "category": "LARGECAP"
+  },
+  "DIVISLAB": {
+    "key": "NSE_EQ|INE361B01024",
+    "name": "Divi's Laboratories Ltd.",
+    "category": "LARGECAP"
+  },
+  "IFCI": {
+    "key": "NSE_EQ|INE039A01010",
+    "name": "IFCI Ltd.",
+    "category": "LARGECAP"
+  },
+  "PETRONET": {
+    "key": "NSE_EQ|INE347G01014",
+    "name": "Petronet LNG Ltd.",
+    "category": "LARGECAP"
+  },
+  "APOLLOHOSP": {
+    "key": "NSE_EQ|INE437A01024",
+    "name": "Apollo Hospitals Enterprises Ltd.",
+    "category": "LARGECAP"
+  },
+  "BAJAJHLDNG": {
+    "key": "NSE_EQ|INE118A01012",
+    "name": "Bajaj Holdings & Investment Ltd.",
+    "category": "LARGECAP"
+  },
+  "GODREJCP": {
+    "key": "NSE_EQ|INE102D01028",
+    "name": "Godrej Consumer Products Ltd.",
+    "category": "LARGECAP"
+  },
+  "TATACONSUM": {
+    "key": "NSE_EQ|INE192A01025",
+    "name": "Tata Global Beverages Ltd.",
+    "category": "LARGECAP"
+  },
+  "UBL": {
+    "key": "NSE_EQ|INE686F01025",
+    "name": "United Breweries Ltd.",
+    "category": "LARGECAP"
+  },
+  "M&MFIN": {
+    "key": "NSE_EQ|INE774D08MG3",
+    "name": "Mahindra & Mahindra Financial Services Ltd.",
+    "category": "LARGECAP"
+  },
+  "OIL": {
+    "key": "NSE_EQ|INE274J01014",
+    "name": "Oil India Ltd.",
+    "category": "LARGECAP"
+  },
+  "IDBI": {
+    "key": "NSE_EQ|INE008A01015",
+    "name": "IDBI Bank Ltd.",
+    "category": "LARGECAP"
+  },
+  "MSUMI": {
+    "key": "NSE_EQ|INE0FS801015",
+    "name": "Motherson Sumi Systems Ltd.",
+    "category": "LARGECAP"
+  },
+  "MRF": {
+    "key": "NSE_EQ|INE883A01011",
+    "name": "MRF Ltd.",
+    "category": "LARGECAP"
+  },
+  "MARICO": {
+    "key": "NSE_EQ|INE196A01026",
+    "name": "Marico Ltd.",
+    "category": "LARGECAP"
+  },
+  "SUNDARMFIN": {
+    "key": "NSE_EQ|INE660A01013",
+    "name": "Sundaram Finance Ltd.",
+    "category": "LARGECAP"
+  },
+  "EMAMILTD": {
+    "key": "NSE_EQ|INE548C01032",
+    "name": "Emami Ltd.",
+    "category": "LARGECAP"
+  },
+  "NHPC": {
+    "key": "NSE_EQ|INE848E01016",
+    "name": "NHPC Ltd.",
+    "category": "LARGECAP"
+  },
+  "PIDILITIND": {
+    "key": "NSE_EQ|INE318A01026",
+    "name": "Pidilite Industries Ltd.",
+    "category": "LARGECAP"
+  },
+  "TORNTPHARM": {
+    "key": "NSE_EQ|INE685A01028",
+    "name": "Torrent Pharmaceuticals Ltd.",
+    "category": "LARGECAP"
+  },
+  "INDIGO": {
+    "key": "NSE_EQ|INE646L01027",
+    "name": "InterGlobe Aviation Ltd.",
+    "category": "LARGECAP"
+  },
+  "HAVELLS": {
+    "key": "NSE_EQ|INE176B01034",
+    "name": "Havells India Ltd.",
+    "category": "LARGECAP"
+  },
+  "ICICIPRULI": {
+    "key": "NSE_EQ|INE726G01019",
+    "name": "ICICI Prudential Life Insurance Company Ltd.",
+    "category": "LARGECAP"
+  },
+  "SUNTV": {
+    "key": "NSE_EQ|INE424H01027",
+    "name": "Sun TV Network Ltd.",
+    "category": "LARGECAP"
+  },
+  "DMART": {
+    "key": "NSE_EQ|INE192R01011",
+    "name": "Avenue Supermarts Ltd.",
+    "category": "LARGECAP"
+  },
+  "GICRE": {
+    "key": "NSE_EQ|INE481Y01014",
+    "name": "General Insurance Corporation of India",
+    "category": "LARGECAP"
+  },
+  "SBILIFE": {
+    "key": "NSE_EQ|INE123W01016",
+    "name": "SBI Life Insurance Company Ltd.",
+    "category": "LARGECAP"
+  },
+  "BANDHANBNK": {
+    "key": "NSE_EQ|INE545U01014",
+    "name": "Bandhan Bank Ltd.",
+    "category": "LARGECAP"
+  },
+  "ICICIGI": {
+    "key": "NSE_EQ|INE765G01017",
+    "name": "ICICI Lombard General Insurance Company Ltd.",
+    "category": "LARGECAP"
+  },
+  "NIACL": {
+    "key": "NSE_EQ|INE470Y01017",
+    "name": "The New India Assurance Company Ltd.",
+    "category": "LARGECAP"
+  },
+  "LICHSGFIN": {
+    "key": "NSE_EQ|INE115A01026",
+    "name": "LIC Housing Finance Ltd.",
+    "category": "LARGECAP"
+  },
+  "HDFCAMC": {
+    "key": "NSE_EQ|INE127D01025",
+    "name": "HDFC Asset Management Company Ltd.",
+    "category": "LARGECAP"
+  },
+  "PAGEIND": {
+    "key": "NSE_EQ|INE761H01022",
+    "name": "Page Industries Ltd.",
+    "category": "LARGECAP"
+  },
+  "BERGEPAINT": {
+    "key": "NSE_EQ|INE463A01038",
+    "name": "Berger Paints India Ltd.",
+    "category": "LARGECAP"
+  },
+  "IGL": {
+    "key": "NSE_EQ|INE203G01027",
+    "name": "Indraprastha Gas Ltd.",
+    "category": "LARGECAP"
+  },
+  "NAUKRI": {
+    "key": "NSE_EQ|INE663F01032",
+    "name": "Info Edge (India) Ltd.",
+    "category": "LARGECAP"
+  },
+  "MUTHOOTFIN": {
+    "key": "NSE_EQ|INE414G01012",
+    "name": "Muthoot Finance Ltd.",
+    "category": "LARGECAP"
+  },
+  "SBICARD": {
+    "key": "NSE_EQ|INE018E01016",
+    "name": "SBI Cards and Payment Services Ltd.",
+    "category": "LARGECAP"
+  },
+  "ARVIND": {
+    "key": "NSE_EQ|INE034A01011",
+    "name": "Arvind Ltd.",
+    "category": "MIDCAP"
+  },
+  "INDIANB": {
+    "key": "NSE_EQ|INE562A01011",
+    "name": "Indian Bank",
+    "category": "MIDCAP"
+  },
+  "HTMEDIA": {
+    "key": "NSE_EQ|INE501G01024",
+    "name": "HT Media Ltd.",
+    "category": "MIDCAP"
+  },
+  "GODREJIND": {
+    "key": "NSE_EQ|INE233A01035",
+    "name": "Godrej Industries Ltd.",
+    "category": "MIDCAP"
+  },
+  "KIRLOSBROS": {
+    "key": "NSE_EQ|INE732A01036",
+    "name": "Kirloskar Brothers Ltd.",
+    "category": "MIDCAP"
+  },
+  "SUNDRMFAST": {
+    "key": "NSE_EQ|INE387A01021",
+    "name": "Sundram Fasteners Ltd.",
+    "category": "MIDCAP"
+  },
+  "SUNCLAY": {
+    "key": "NSE_EQ|INE0Q3R01026",
+    "name": "Sundaram Clayton Ltd.",
+    "category": "MIDCAP"
+  },
+  "OMAXE": {
+    "key": "NSE_EQ|INE800H01010",
+    "name": "Omaxe Ltd.",
+    "category": "MIDCAP"
+  },
+  "PARSVNATH": {
+    "key": "NSE_EQ|INE561H01026",
+    "name": "Parsvnath Developer Ltd.",
+    "category": "MIDCAP"
+  },
+  "ASAHIINDIA": {
+    "key": "NSE_EQ|INE439A01020",
+    "name": "Asahi India Glass Ltd.",
+    "category": "MIDCAP"
+  },
+  "HEXT": {
+    "key": "NSE_EQ|INE093A01041",
+    "name": "Hexaware Technologies Ltd.",
+    "category": "MIDCAP"
+  },
+  "BIRLACORPN": {
+    "key": "NSE_EQ|INE340A01012",
+    "name": "Birla Corporation Ltd.",
+    "category": "MIDCAP"
+  },
+  "WELCORP": {
+    "key": "NSE_EQ|INE191B01025",
+    "name": "Welspun Corp Ltd.",
+    "category": "MIDCAP"
+  },
+  "GVKPIL": {
+    "key": "NSE_EQ|INE251H01024",
+    "name": "GVK Power & Infrastructures Ltd.",
+    "category": "MIDCAP"
+  },
+  "DREDGECORP": {
+    "key": "NSE_EQ|INE506A01018",
+    "name": "Dredging Corporation of India Ltd.",
+    "category": "MIDCAP"
+  },
+  "IRB": {
+    "key": "NSE_EQ|INE821I01022",
+    "name": "IRB Infrastructure Developers Ltd.",
+    "category": "MIDCAP"
+  },
+  "ADANIPOWER": {
+    "key": "NSE_EQ|INE814H01029",
+    "name": "Adani Power Ltd.",
+    "category": "MIDCAP"
+  },
+  "JUBLFOOD": {
+    "key": "NSE_EQ|INE797F01020",
+    "name": "Jubilant Life Sciences Ltd.",
+    "category": "MIDCAP"
+  },
+  "KARURVYSYA": {
+    "key": "NSE_EQ|INE036D01028",
+    "name": "Karur Vysya Bank Ltd.",
+    "category": "MIDCAP"
+  },
+  "HMT": {
+    "key": "NSE_EQ|INE262A01018",
+    "name": "HMT Ltd.",
+    "category": "MIDCAP"
+  },
+  "RCF": {
+    "key": "NSE_EQ|INE027A01015",
+    "name": "Rashtriya Chemicals & Fertilizers Ltd.",
+    "category": "MIDCAP"
+  },
+  "MAHABANK": {
+    "key": "NSE_EQ|INE457A01014",
+    "name": "Bank of Maharashtra",
+    "category": "MIDCAP"
+  },
+  "VOLTAS": {
+    "key": "NSE_EQ|INE226A01021",
+    "name": "Voltas Ltd.",
+    "category": "MIDCAP"
+  },
+  "JINDALSAW": {
+    "key": "NSE_EQ|INE324A01032",
+    "name": "Jindal Saw Ltd.",
+    "category": "MIDCAP"
+  },
+  "BAJAJHIND": {
+    "key": "NSE_EQ|INE306A01021",
+    "name": "Bajaj Hindusthan Ltd.",
+    "category": "MIDCAP"
+  },
+  "BALRAMCHIN": {
+    "key": "NSE_EQ|INE119A01028",
+    "name": "Balrampur Chini Mills Ltd.",
+    "category": "MIDCAP"
+  },
+  "RENUKA": {
+    "key": "NSE_EQ|INE087H01022",
+    "name": "Shree Renuka Sugars Ltd.",
+    "category": "MIDCAP"
+  },
+  "BEML": {
+    "key": "NSE_EQ|INE258A01024",
+    "name": "BEML Ltd.",
+    "category": "MIDCAP"
+  },
+  "GSPL": {
+    "key": "NSE_EQ|INE246F01010",
+    "name": "Gujarat State Petronet Ltd.",
+    "category": "MIDCAP"
+  },
+  "JSWENERGY": {
+    "key": "NSE_EQ|INE121E01018",
+    "name": "JSW Energy Ltd.",
+    "category": "MIDCAP"
+  },
+  "SOUTHBANK": {
+    "key": "NSE_EQ|INE683A01023",
+    "name": "South Indian Bank Ltd.",
+    "category": "MIDCAP"
+  },
+  "IPCALAB": {
+    "key": "NSE_EQ|INE571A01038",
+    "name": "Ipca Laboratories Ltd.",
+    "category": "MIDCAP"
+  },
+  "KTKBANK": {
+    "key": "NSE_EQ|INE614B01018",
+    "name": "Karnataka Bank Ltd.",
+    "category": "MIDCAP"
+  },
+  "CRISIL": {
+    "key": "NSE_EQ|INE007A01025",
+    "name": "CRISIL Ltd.",
+    "category": "MIDCAP"
+  },
+  "DISHTV": {
+    "key": "NSE_EQ|INE836F01026",
+    "name": "Dish TV India Ltd.",
+    "category": "MIDCAP"
+  },
+  "ENGINERSIN": {
+    "key": "NSE_EQ|INE510A01028",
+    "name": "Engineers India Ltd.",
+    "category": "MIDCAP"
+  },
+  "MMTC": {
+    "key": "NSE_EQ|INE123F01029",
+    "name": "MMTC Ltd.",
+    "category": "MIDCAP"
+  },
+  "MCLEODRUSS": {
+    "key": "NSE_EQ|INE942G01012",
+    "name": "McLeod Russel India Ltd.",
+    "category": "MIDCAP"
+  },
+  "UCOBANK": {
+    "key": "NSE_EQ|INE691A01018",
+    "name": "UCO Bank",
+    "category": "MIDCAP"
+  },
+  "KPITTECH": {
+    "key": "NSE_EQ|INE04I401011",
+    "name": "KPIT Technologies Ltd.",
+    "category": "MIDCAP"
+  },
+  "JISLJALEQS": {
+    "key": "NSE_EQ|INE175A01038",
+    "name": "Jain Irrigation Systems Ltd.",
+    "category": "MIDCAP"
+  },
+  "J&KBANK": {
+    "key": "NSE_EQ|INE168A01041",
+    "name": "Jammu & Kashmir Bank Ltd.",
+    "category": "MIDCAP"
+  },
+  "MAXIND": {
+    "key": "NSE_EQ|INE0CG601016",
+    "name": "Max India Ltd.",
+    "category": "MIDCAP"
+  },
+  "AJANTPHARM": {
+    "key": "NSE_EQ|INE031B01049",
+    "name": "Ajanta Pharmaceuticals Ltd.",
+    "category": "MIDCAP"
+  },
+  "DCBBANK": {
+    "key": "NSE_EQ|INE503A01015",
+    "name": "DCB Bank Ltd.",
+    "category": "MIDCAP"
+  },
+  "GPPL": {
+    "key": "NSE_EQ|INE517F01014",
+    "name": "Gujarat Pipavav Port Ltd.",
+    "category": "MIDCAP"
+  },
+  "NATCOPHARM": {
+    "key": "NSE_EQ|INE987B01026",
+    "name": "NATCO Pharma Ltd.",
+    "category": "MIDCAP"
+  },
+  "NCC": {
+    "key": "NSE_EQ|INE868B01028",
+    "name": "NCC Ltd.",
+    "category": "MIDCAP"
+  },
+  "RAJESHEXPO": {
+    "key": "NSE_EQ|INE343B01030",
+    "name": "Rajesh Exports Ltd.",
+    "category": "MIDCAP"
+  },
+  "SRF": {
+    "key": "NSE_EQ|INE647A01010",
+    "name": "SRF Ltd.",
+    "category": "MIDCAP"
+  },
+  "SPARC": {
+    "key": "NSE_EQ|INE232I01014",
+    "name": "Sun Pharma Advanced Research Company Ltd.",
+    "category": "MIDCAP"
+  },
+  "VAKRANGEE": {
+    "key": "NSE_EQ|INE051B01021",
+    "name": "Vakrangee Ltd.",
+    "category": "MIDCAP"
+  },
+  "PERSISTENT": {
+    "key": "NSE_EQ|INE262H01021",
+    "name": "Persistent Systems Ltd.",
+    "category": "MIDCAP"
+  },
+  "APLLTD": {
+    "key": "NSE_EQ|INE901L01018",
+    "name": "Alembic Pharmaceuticals Ltd.",
+    "category": "MIDCAP"
+  },
+  "CEATLTD": {
+    "key": "NSE_EQ|INE482A01020",
+    "name": "Ceat Ltd.",
+    "category": "MIDCAP"
+  },
+  "TATAELXSI": {
+    "key": "NSE_EQ|INE670A01012",
+    "name": "Tata Elxsi Ltd.",
+    "category": "MIDCAP"
+  },
+  "RBLBANK": {
+    "key": "NSE_EQ|INE976G01028",
+    "name": "RBL Bank Ltd.",
+    "category": "MIDCAP"
+  },
+  "PNBHOUSING": {
+    "key": "NSE_EQ|INE572E01012",
+    "name": "PNB Housing Finance Ltd.",
+    "category": "MIDCAP"
+  },
+  "FORTIS": {
+    "key": "NSE_EQ|INE061F01013",
+    "name": "Fortis Healthcare Ltd.",
+    "category": "MIDCAP"
+  },
+  "CESC": {
+    "key": "NSE_EQ|INE486A01021",
+    "name": "CESC Ltd.",
+    "category": "MIDCAP"
+  },
+  "GRAPHITE": {
+    "key": "NSE_EQ|INE371A01025",
+    "name": "Graphite India Ltd.",
+    "category": "MIDCAP"
+  },
+  "CGPOWER": {
+    "key": "NSE_EQ|INE067A01029",
+    "name": "CG Power and Industrial Solutions Ltd.",
+    "category": "MIDCAP"
+  },
+  "KANSAINER": {
+    "key": "NSE_EQ|INE531A01024",
+    "name": "Kansai Nerolac Paints Ltd.",
+    "category": "MIDCAP"
+  },
+  "SANOFI": {
+    "key": "NSE_EQ|INE058A01010",
+    "name": "Sanofi India Ltd.",
+    "category": "MIDCAP"
+  },
+  "ABFRL": {
+    "key": "NSE_EQ|INE647O01011",
+    "name": "Aditya Birla Fashion and Retail Ltd.",
+    "category": "MIDCAP"
+  },
+  "AIAENG": {
+    "key": "NSE_EQ|INE212H01026",
+    "name": "AIA Engineering Ltd.",
+    "category": "MIDCAP"
+  },
+  "ALKEM": {
+    "key": "NSE_EQ|INE540L01014",
+    "name": "Alkem Laboratories Ltd.",
+    "category": "MIDCAP"
+  },
+  "AUBANK": {
+    "key": "NSE_EQ|INE949L01017",
+    "name": "AU Small Finance Bank Ltd.",
+    "category": "MIDCAP"
+  },
+  "BALKRISIND": {
+    "key": "NSE_EQ|INE787D01026",
+    "name": "Balkrishna Industries Ltd.",
+    "category": "MIDCAP"
+  },
+  "CENTRALBK": {
+    "key": "NSE_EQ|INE483A01010",
+    "name": "Central Bank of India",
+    "category": "MIDCAP"
+  },
+  "CHOLAFIN": {
+    "key": "NSE_EQ|INE121A08PJ0",
+    "name": "Cholamandalam Investment and Finance Company Ltd.",
+    "category": "MIDCAP"
+  },
+  "COROMANDEL": {
+    "key": "NSE_EQ|INE169A01031",
+    "name": "Coromandel International Ltd.",
+    "category": "MIDCAP"
+  },
+  "DBL": {
+    "key": "NSE_EQ|INE917M01012",
+    "name": "Dilip Buildcon Ltd.",
+    "category": "MIDCAP"
+  },
+  "EDELWEISS": {
+    "key": "NSE_EQ|INE532F01054",
+    "name": "Edelweiss Financial Services Ltd.",
+    "category": "MIDCAP"
+  },
+  "ENDURANCE": {
+    "key": "NSE_EQ|INE913H01037",
+    "name": "Endurance Technologies Ltd.",
+    "category": "MIDCAP"
+  },
+  "GODREJAGRO": {
+    "key": "NSE_EQ|INE850D01014",
+    "name": "Godrej Agrovet Ltd.",
+    "category": "MIDCAP"
+  },
+  "HUDCO": {
+    "key": "NSE_EQ|INE031A01017",
+    "name": "Housing & Urban Development Corporation Ltd.",
+    "category": "MIDCAP"
+  },
+  "MANAPPURAM": {
+    "key": "NSE_EQ|INE522D01027",
+    "name": "Manappuram Finance Ltd.",
+    "category": "MIDCAP"
+  },
+  "MAXHEALTH": {
+    "key": "NSE_EQ|INE027H01010",
+    "name": "Max Financial Services Ltd.",
+    "category": "MIDCAP"
+  },
+  "MGL": {
+    "key": "NSE_EQ|INE002S01010",
+    "name": "Mahanagar Gas Ltd.",
+    "category": "MIDCAP"
+  },
+  "NBCC": {
+    "key": "NSE_EQ|INE095N01031",
+    "name": "NBCC (India) Ltd.",
+    "category": "MIDCAP"
+  },
+  "OBEROIRLTY": {
+    "key": "NSE_EQ|INE093I01010",
+    "name": "Oberoi Realty Ltd.",
+    "category": "MIDCAP"
+  },
+  "PCJEWELLER": {
+    "key": "NSE_EQ|INE785M01021",
+    "name": "PC Jeweller Ltd.",
+    "category": "MIDCAP"
+  },
+  "PIIND": {
+    "key": "NSE_EQ|INE603J01030",
+    "name": "PI Industries Ltd.",
+    "category": "MIDCAP"
+  },
+  "PRESTIGE": {
+    "key": "NSE_EQ|INE811K01011",
+    "name": "Prestige Estates Projects Ltd.",
+    "category": "MIDCAP"
+  },
+  "STLTECH": {
+    "key": "NSE_EQ|INE089C01029",
+    "name": "Sterlite Technologies Ltd.",
+    "category": "MIDCAP"
+  },
+  "SYNGENE": {
+    "key": "NSE_EQ|INE398R01022",
+    "name": "Syngene International Ltd.",
+    "category": "MIDCAP"
+  },
+  "VGUARD": {
+    "key": "NSE_EQ|INE951I01027",
+    "name": "V-Guard Industries Ltd.",
+    "category": "MIDCAP"
+  },
+  "QUESS": {
+    "key": "NSE_EQ|INE615P01015",
+    "name": "Quess Corp Ltd.",
+    "category": "MIDCAP"
+  },
+  "AVANTIFEED": {
+    "key": "NSE_EQ|INE871C01038",
+    "name": "Avanti Feeds Ltd.",
+    "category": "MIDCAP"
+  },
+  "HEG": {
+    "key": "NSE_EQ|INE545A01024",
+    "name": "H.E.G. Ltd.",
+    "category": "MIDCAP"
+  },
+  "BBTC": {
+    "key": "NSE_EQ|INE050A01025",
+    "name": "Bombay Burmah Trading Corporation Ltd.",
+    "category": "MIDCAP"
+  },
+  "VARROC": {
+    "key": "NSE_EQ|INE665L01035",
+    "name": "Varroc Engineering Ltd.",
+    "category": "MIDCAP"
+  },
+  "LTTS": {
+    "key": "NSE_EQ|INE010V01017",
+    "name": "L&T Technology Services Ltd.",
+    "category": "MIDCAP"
+  },
+  "CUB": {
+    "key": "NSE_EQ|INE491A01021",
+    "name": "City Union Bank Ltd.",
+    "category": "MIDCAP"
+  },
+  "DALBHARAT": {
+    "key": "NSE_EQ|INE00R701025",
+    "name": "Dalmia Bharat Ltd.",
+    "category": "MIDCAP"
+  },
+  "GODREJPROP": {
+    "key": "NSE_EQ|INE484J01027",
+    "name": "Godrej Properties Ltd.",
+    "category": "MIDCAP"
+  },
+  "VBL": {
+    "key": "NSE_EQ|INE200M01039",
+    "name": "Varun Beverages Ltd.",
+    "category": "MIDCAP"
+  },
+  "WHIRLPOOL": {
+    "key": "NSE_EQ|INE716A01013",
+    "name": "Whirlpool of India Ltd.",
+    "category": "MIDCAP"
+  },
+  "AARTIIND": {
+    "key": "NSE_EQ|INE769A01020",
+    "name": "Aarti Industries Ltd.",
+    "category": "MIDCAP"
+  },
+  "TRENT": {
+    "key": "NSE_EQ|INE849A01020",
+    "name": "Trent Ltd.",
+    "category": "MIDCAP"
+  },
+  "GUJGASLTD": {
+    "key": "NSE_EQ|INE844O01030",
+    "name": "Gujarat Gas Ltd.",
+    "category": "MIDCAP"
+  },
+  "LALPATHLAB": {
+    "key": "NSE_EQ|INE600L01024",
+    "name": "Dr. Lal Path Labs Ltd.",
+    "category": "MIDCAP"
+  },
+  "ATGL": {
+    "key": "NSE_EQ|INE399L01023",
+    "name": "Adani Gas Ltd.",
+    "category": "MIDCAP"
+  },
+  "POLYCAB": {
+    "key": "NSE_EQ|INE455K01017",
+    "name": "Polycab India Ltd.",
+    "category": "MIDCAP"
+  },
+  "IRCTC": {
+    "key": "NSE_EQ|INE335Y01020",
+    "name": "Indian Railway Catering And Tourism Corporation Ltd.",
+    "category": "MIDCAP"
+  },
+  "HCC": {
+    "key": "NSE_EQ|INE549A01026",
+    "name": "Hindustan Construction Co. Ltd.",
+    "category": "MIDCAP"
+  },
+  "KESORAMIND": {
+    "key": "NSE_EQ|INE087A01019",
+    "name": "Kesoram Industries Ltd.",
+    "category": "MIDCAP"
+  },
+  "MAHSEAMLES": {
+    "key": "NSE_EQ|INE271B01025",
+    "name": "Maharashtra Seamless Ltd.",
+    "category": "MIDCAP"
+  },
+  "MAHLIFE": {
+    "key": "NSE_EQ|INE813A01018",
+    "name": "Mahindra Lifespace Developers Ltd.",
+    "category": "MIDCAP"
+  },
+  "PENINLAND": {
+    "key": "NSE_EQ|INE138A01028",
+    "name": "Peninsula Land Ltd.",
+    "category": "MIDCAP"
+  },
+  "PRAJIND": {
+    "key": "NSE_EQ|INE074A01025",
+    "name": "Praj Industries Ltd.",
+    "category": "MIDCAP"
+  },
+  "PATELENG": {
+    "key": "NSE_EQ|INE244B01030",
+    "name": "Patel Engineering Ltd.",
+    "category": "MIDCAP"
+  },
+  "ANSALAPI": {
+    "key": "NSE_EQ|INE436A01026",
+    "name": "Ansal Properties & Infrastructure Ltd.",
+    "category": "MIDCAP"
+  },
+  "RAMCOCEM": {
+    "key": "NSE_EQ|INE331A01037",
+    "name": "The Ramco Cements Ltd.",
+    "category": "MIDCAP"
+  },
+  "TRIDENT": {
+    "key": "NSE_EQ|INE064C01022",
+    "name": "Trident Ltd.",
+    "category": "MIDCAP"
+  },
+  "UNICHEMLAB": {
+    "key": "NSE_EQ|INE351A01035",
+    "name": "Unichem Laboratories Ltd.",
+    "category": "MIDCAP"
+  },
+  "GATEWAY": {
+    "key": "NSE_EQ|INE079J01017",
+    "name": "Gateway Distriparks Ltd.",
+    "category": "MIDCAP"
+  },
+  "GOKEX": {
+    "key": "NSE_EQ|INE887G01027",
+    "name": "Gokaldas Exports Ltd.",
+    "category": "MIDCAP"
+  },
+  "FLUOROCHEM": {
+    "key": "NSE_EQ|INE09N301011",
+    "name": "Gujarat Fluorochemicals Ltd.",
+    "category": "MIDCAP"
+  },
+  "JPPOWER": {
+    "key": "NSE_EQ|INE351F01018",
+    "name": "Jaiprakash Power Ventures Ltd.",
+    "category": "MIDCAP"
+  },
+  "SHOPERSTOP": {
+    "key": "NSE_EQ|INE498B01024",
+    "name": "Shoppers Stop Ltd.",
+    "category": "MIDCAP"
+  },
+  "ALEMBICLTD": {
+    "key": "NSE_EQ|INE426A01027",
+    "name": "Alembic Ltd.",
+    "category": "MIDCAP"
+  },
+  "HIKAL": {
+    "key": "NSE_EQ|INE475B01022",
+    "name": "Hikal Ltd.",
+    "category": "MIDCAP"
+  },
+  "JBCHEPHARM": {
+    "key": "NSE_EQ|INE572A01036",
+    "name": "J.B. Chemicals & Pharmaceuticals Ltd.",
+    "category": "MIDCAP"
+  },
+  "MPSLTD": {
+    "key": "NSE_EQ|INE943D01017",
+    "name": "MPS Ltd.",
+    "category": "MIDCAP"
+  },
+  "PTC": {
+    "key": "NSE_EQ|INE877F01012",
+    "name": "PTC India Ltd.",
+    "category": "MIDCAP"
+  },
+  "63MOONS": {
+    "key": "NSE_EQ|INE111B01023",
+    "name": "63 Moons Technologies Ltd.",
+    "category": "MIDCAP"
+  },
+  "CARBORUNIV": {
+    "key": "NSE_EQ|INE120A01034",
+    "name": "Carborundum Universal Ltd.",
+    "category": "MIDCAP"
+  },
+  "RADICO": {
+    "key": "NSE_EQ|INE944F01028",
+    "name": "Radico Khaitan Ltd",
+    "category": "MIDCAP"
+  },
+  "FDC": {
+    "key": "NSE_EQ|INE258B01022",
+    "name": "FDC Ltd.",
+    "category": "MIDCAP"
+  },
+  "GIPCL": {
+    "key": "NSE_EQ|INE162A01010",
+    "name": "Gujarat Industries Power Co. Ltd.",
+    "category": "MIDCAP"
+  },
+  "INDORAMA": {
+    "key": "NSE_EQ|INE156A01020",
+    "name": "Indo Rama Synthetics Ltd.",
+    "category": "MIDCAP"
+  },
+  "TRIVENI": {
+    "key": "NSE_EQ|INE256C01024",
+    "name": "Triveni Engineering & Industries Ltd.",
+    "category": "MIDCAP"
+  },
+  "ALOKINDS": {
+    "key": "NSE_EQ|INE270A01029",
+    "name": "Alok Industries Ltd.",
+    "category": "MIDCAP"
+  },
+  "FINPIPE": {
+    "key": "NSE_EQ|INE183A01024",
+    "name": "Finolex Industries Ltd.",
+    "category": "MIDCAP"
+  },
+  "GUJALKALI": {
+    "key": "NSE_EQ|INE186A01019",
+    "name": "Gujarat Alkalies & Chemicals Ltd.",
+    "category": "MIDCAP"
+  },
+  "GMDCLTD": {
+    "key": "NSE_EQ|INE131A01031",
+    "name": "Gujarat Mineral Development Corporation Ltd.",
+    "category": "MIDCAP"
+  },
+  "RICOAUTO": {
+    "key": "NSE_EQ|INE209B01025",
+    "name": "Rico Auto Industries Ltd.",
+    "category": "MIDCAP"
+  },
+  "ANANTRAJ": {
+    "key": "NSE_EQ|INE242C01024",
+    "name": "Anant Raj Ltd.",
+    "category": "MIDCAP"
+  },
+  "JMFINANCIL": {
+    "key": "NSE_EQ|INE780C01023",
+    "name": "JM Financial Ltd.",
+    "category": "MIDCAP"
+  },
+  "SOBHA": {
+    "key": "NSE_EQ|INE671H01015",
+    "name": "Sobha Ltd.",
+    "category": "MIDCAP"
+  },
+  "BLUEDART": {
+    "key": "NSE_EQ|INE233B01017",
+    "name": "Blue Dart Express Ltd.",
+    "category": "MIDCAP"
+  },
+  "DCMSHRIRAM": {
+    "key": "NSE_EQ|INE499A01024",
+    "name": "DCM Shriram Ltd.",
+    "category": "MIDCAP"
+  },
+  "EIDPARRY": {
+    "key": "NSE_EQ|INE126A01031",
+    "name": "E.I.D. Parry (India) Ltd.",
+    "category": "MIDCAP"
+  },
+  "HIMATSEIDE": {
+    "key": "NSE_EQ|INE049A01027",
+    "name": "Himatsingka Seide Ltd.",
+    "category": "MIDCAP"
+  },
+  "TIINDIA": {
+    "key": "NSE_EQ|INE974X01010",
+    "name": "Tube Investments of India Ltd.-Old",
+    "category": "MIDCAP"
+  },
+  "VTL": {
+    "key": "NSE_EQ|INE825A01020",
+    "name": "Vardhman Textiles Ltd.",
+    "category": "MIDCAP"
+  },
+  "BFUTILITIE": {
+    "key": "NSE_EQ|INE243D01012",
+    "name": "BF Utilities Ltd.",
+    "category": "MIDCAP"
+  },
+  "FSL": {
+    "key": "NSE_EQ|INE684F01012",
+    "name": "Firstsource Solutions Ltd.",
+    "category": "MIDCAP"
+  },
+  "HUBTOWN": {
+    "key": "NSE_EQ|INE703H01016",
+    "name": "Hubtown Ltd.",
+    "category": "MIDCAP"
+  },
+  "JAICORPLTD": {
+    "key": "NSE_EQ|INE070D01027",
+    "name": "Jai Corp Ltd.",
+    "category": "MIDCAP"
+  },
+  "ASIANHOTNR": {
+    "key": "NSE_EQ|INE363A01022",
+    "name": "Asian Hotels (North) Ltd.",
+    "category": "MIDCAP"
+  },
+  "GODFRYPHLP": {
+    "key": "NSE_EQ|INE260B01028",
+    "name": "Godfrey Phillips India Ltd.",
+    "category": "MIDCAP"
+  },
+  "PHOENIXLTD": {
+    "key": "NSE_EQ|INE211B01039",
+    "name": "Phoenix Mills Ltd.",
+    "category": "MIDCAP"
+  },
+  "PURVA": {
+    "key": "NSE_EQ|INE323I01011",
+    "name": "Puravankara Ltd.",
+    "category": "MIDCAP"
+  },
+  "GSFC": {
+    "key": "NSE_EQ|INE026A01025",
+    "name": "Gujarat State Fertilizers & Chemicals Ltd.",
+    "category": "MIDCAP"
+  },
+  "SKFINDIA": {
+    "key": "NSE_EQ|INE640A01023",
+    "name": "SKF India Ltd.",
+    "category": "MIDCAP"
+  },
+  "BLUESTARCO": {
+    "key": "NSE_EQ|INE472A01039",
+    "name": "Blue Star Ltd.",
+    "category": "MIDCAP"
+  },
+  "ORCHPHARMA": {
+    "key": "NSE_EQ|INE191A01027",
+    "name": "Orchid Pharma Ltd.",
+    "category": "MIDCAP"
+  },
+  "GTLINFRA": {
+    "key": "NSE_EQ|INE221H01019",
+    "name": "GTL Infrastructure Ltd.",
+    "category": "MIDCAP"
+  },
+  "IL&FSENGG": {
+    "key": "NSE_EQ|INE369I01014",
+    "name": "IL&FS Engineering and Construction Company Ltd.",
+    "category": "MIDCAP"
+  },
+  "RELIGARE": {
+    "key": "NSE_EQ|INE621H01010",
+    "name": "Religare Enterprises Ltd.",
+    "category": "MIDCAP"
+  },
+  "JSL": {
+    "key": "NSE_EQ|INE220G01021",
+    "name": "Jindal Stainless Ltd.",
+    "category": "MIDCAP"
+  },
+  "PANACEABIO": {
+    "key": "NSE_EQ|INE922B01023",
+    "name": "Panacea Biotec Ltd.",
+    "category": "MIDCAP"
+  },
+  "JAGRAN": {
+    "key": "NSE_EQ|INE199G01027",
+    "name": "Jagran Prakashan Ltd.",
+    "category": "MIDCAP"
+  },
+  "NFL": {
+    "key": "NSE_EQ|INE870D01012",
+    "name": "National Fertilizers Ltd.",
+    "category": "MIDCAP"
+  },
+  "ONMOBILE": {
+    "key": "NSE_EQ|INE809I01019",
+    "name": "OnMobile Global Ltd.",
+    "category": "MIDCAP"
+  },
+  "3MINDIA": {
+    "key": "NSE_EQ|INE470A01017",
+    "name": "3M India Ltd.",
+    "category": "MIDCAP"
+  },
+  "AKZOINDIA": {
+    "key": "NSE_EQ|INE133A01011",
+    "name": "Akzo Nobel India Ltd.",
+    "category": "MIDCAP"
+  },
+  "FELDVR": {
+    "key": "NSE_EQ|IN9623B01058",
+    "name": "Future Enterprises Ltd.",
+    "category": "MIDCAP"
+  },
+  "GNFC": {
+    "key": "NSE_EQ|INE113A01013",
+    "name": "Gujarat Narmada Valley Fertilizers and Chemicals Ltd.",
+    "category": "MIDCAP"
+  },
+  "KIRLOSIND": {
+    "key": "NSE_EQ|INE250A01039",
+    "name": "Kirloskar Industries Ltd.",
+    "category": "MIDCAP"
+  },
+  "BGRENERGY": {
+    "key": "NSE_EQ|INE661I01014",
+    "name": "BGR Energy Systems Ltd",
+    "category": "MIDCAP"
+  },
+  "HINDOILEXP": {
+    "key": "NSE_EQ|INE345A01011",
+    "name": "Hindustan Oil Exploration Co. Ltd.",
+    "category": "MIDCAP"
+  },
+  "MHRIL": {
+    "key": "NSE_EQ|INE998I01010",
+    "name": "Mahindra Holidays & Resorts India Ltd.",
+    "category": "MIDCAP"
+  },
+  "RTNPOWER": {
+    "key": "NSE_EQ|INE399K01017",
+    "name": "RattanIndia Power Ltd.",
+    "category": "MIDCAP"
+  },
+  "SUNTECK": {
+    "key": "NSE_EQ|INE805D01034",
+    "name": "Sunteck Realty Ltd.",
+    "category": "MIDCAP"
+  },
+  "TATAINVEST": {
+    "key": "NSE_EQ|INE672A01026",
+    "name": "Tata Investment Corporation Ltd.",
+    "category": "MIDCAP"
+  },
+  "DBCORP": {
+    "key": "NSE_EQ|INE950I01011",
+    "name": "D.B.Corp Ltd.",
+    "category": "MIDCAP"
+  },
+  "HINDCOPPER": {
+    "key": "NSE_EQ|INE531E01026",
+    "name": "Hindustan Copper Ltd.",
+    "category": "MIDCAP"
+  },
+  "IL&FSTRANS": {
+    "key": "NSE_EQ|INE975G01012",
+    "name": "IL&FS Transportation Networks Ltd.",
+    "category": "MIDCAP"
+  },
+  "SJVN": {
+    "key": "NSE_EQ|INE002L01015",
+    "name": "SJVN Ltd.",
+    "category": "MIDCAP"
+  },
+  "SBIN": {
+    "key": "NSE_EQ|INE062A01020",
+    "name": "State Bank of Mysore",
+    "category": "MIDCAP"
+  },
+  "MOIL": {
+    "key": "NSE_EQ|INE490G01020",
+    "name": "MOIL Ltd.",
+    "category": "MIDCAP"
+  },
+  "REDINGTON": {
+    "key": "NSE_EQ|INE891D01026",
+    "name": "Redington (India) Ltd.",
+    "category": "MIDCAP"
+  },
+  "LINDEINDIA": {
+    "key": "NSE_EQ|INE473A01011",
+    "name": "Linde India Ltd.",
+    "category": "MIDCAP"
+  },
+  "TTKPRESTIG": {
+    "key": "NSE_EQ|INE690A01028",
+    "name": "TTK Prestige Ltd.",
+    "category": "MIDCAP"
+  },
+  "GVPIL": {
+    "key": "NSE_EQ|INE878A01011",
+    "name": "GE Power India Ltd.",
+    "category": "MIDCAP"
+  },
+  "HATHWAY": {
+    "key": "NSE_EQ|INE982F01036",
+    "name": "Hathway Cable & Datacom Ltd.",
+    "category": "MIDCAP"
+  },
+  "NETWORK18": {
+    "key": "NSE_EQ|INE870H01013",
+    "name": "Network18 Media & Investments Ltd.",
+    "category": "MIDCAP"
+  },
+  "SUPREMEIND": {
+    "key": "NSE_EQ|INE195A01028",
+    "name": "Supreme Industries Ltd.",
+    "category": "MIDCAP"
+  },
+  "CYIENT": {
+    "key": "NSE_EQ|INE136B01020",
+    "name": "Cyient Ltd.",
+    "category": "MIDCAP"
+  },
+  "ECLERX": {
+    "key": "NSE_EQ|INE738I01010",
+    "name": "eClerx Services Ltd.",
+    "category": "MIDCAP"
+  },
+  "RALLIS": {
+    "key": "NSE_EQ|INE613A01020",
+    "name": "Rallis India Ltd.",
+    "category": "MIDCAP"
+  },
+  "KSCL": {
+    "key": "NSE_EQ|INE455I01029",
+    "name": "Kaveri Seed Company Ltd.",
+    "category": "MIDCAP"
+  },
+  "SCHAEFFLER": {
+    "key": "NSE_EQ|INE513A01022",
+    "name": "Schaeffler India Ltd.",
+    "category": "MIDCAP"
+  },
+  "BASF": {
+    "key": "NSE_EQ|INE373A01013",
+    "name": "BASF India Ltd.",
+    "category": "MIDCAP"
+  },
+  "HONAUT": {
+    "key": "NSE_EQ|INE671A01010",
+    "name": "Honeywell Automation India Ltd.",
+    "category": "MIDCAP"
+  },
+  "KAJARIACER": {
+    "key": "NSE_EQ|INE217B01036",
+    "name": "Kajaria Ceramics Ltd.",
+    "category": "MIDCAP"
+  },
+  "SOLARINDS": {
+    "key": "NSE_EQ|INE343H01029",
+    "name": "Solar Industries India Ltd.",
+    "category": "MIDCAP"
+  },
+  "SYMPHONY": {
+    "key": "NSE_EQ|INE225D01027",
+    "name": "Symphony Ltd.",
+    "category": "MIDCAP"
+  },
+  "INOXWIND": {
+    "key": "NSE_EQ|INE066P01011",
+    "name": "Inox Wind Ltd.",
+    "category": "MIDCAP"
+  },
+  "SADBHAV": {
+    "key": "NSE_EQ|INE226H01026",
+    "name": "Sadbhav Engineering Ltd.",
+    "category": "MIDCAP"
+  },
+  "RELAXO": {
+    "key": "NSE_EQ|INE131B01039",
+    "name": "Relaxo Footwears Ltd.",
+    "category": "MIDCAP"
+  },
+  "NH": {
+    "key": "NSE_EQ|INE410P01011",
+    "name": "Narayana Hrudayalaya Ltd.",
+    "category": "MIDCAP"
+  },
+  "MOTILALOFS": {
+    "key": "NSE_EQ|INE338I01027",
+    "name": "Motilal Oswal Financial Services Ltd.",
+    "category": "MIDCAP"
+  },
+  "KRBL": {
+    "key": "NSE_EQ|INE001B01026",
+    "name": "KRBL Ltd.",
+    "category": "MIDCAP"
+  },
+  "HATSUN": {
+    "key": "NSE_EQ|INE473B01035",
+    "name": "Hatsun Agro Product Ltd.",
+    "category": "MIDCAP"
+  },
+  "KIOCL": {
+    "key": "NSE_EQ|INE880L01014",
+    "name": "KIOCL Ltd.",
+    "category": "MIDCAP"
+  },
+  "HAL": {
+    "key": "NSE_EQ|INE066F01020",
+    "name": "Hindustan Aeronautics Ltd.",
+    "category": "MIDCAP"
+  },
+  "ATUL": {
+    "key": "NSE_EQ|INE100A01010",
+    "name": "Atul Ltd.",
+    "category": "MIDCAP"
+  },
+  "ERIS": {
+    "key": "NSE_EQ|INE406M01024",
+    "name": "Eris Lifesciences Ltd.",
+    "category": "MIDCAP"
+  },
+  "AAVAS": {
+    "key": "NSE_EQ|INE216P01012",
+    "name": "Aavas Financiers Ltd.",
+    "category": "MIDCAP"
+  },
+  "BAYERCROP": {
+    "key": "NSE_EQ|INE462A01022",
+    "name": "Bayer Cropscience Ltd.",
+    "category": "MIDCAP"
+  },
+  "VINATIORGA": {
+    "key": "NSE_EQ|INE410B01037",
+    "name": "Vinati Organics Ltd.",
+    "category": "MIDCAP"
+  },
+  "ADANIGREEN": {
+    "key": "NSE_EQ|INE364U01010",
+    "name": "Adani Green Energy Ltd.",
+    "category": "MIDCAP"
+  },
+  "JKCEMENT": {
+    "key": "NSE_EQ|INE823G01014",
+    "name": "J.K. Cement Ltd.",
+    "category": "MIDCAP"
+  },
+  "CREDITACC": {
+    "key": "NSE_EQ|INE741K01010",
+    "name": "CreditAccess Grameen Ltd.",
+    "category": "MIDCAP"
+  },
+  "SUMICHEM": {
+    "key": "NSE_EQ|INE258G01013",
+    "name": "Sumitomo Chemical India Ltd.",
+    "category": "MIDCAP"
+  }
+}

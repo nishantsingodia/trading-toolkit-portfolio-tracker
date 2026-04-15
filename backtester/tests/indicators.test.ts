@@ -187,16 +187,37 @@ describe("Supertrend", () => {
 });
 
 describe("VWAP", () => {
-  it("returns values for non-zero volume candles", () => {
-    const result = vwap(SAMPLE_CANDLES);
-    expect(result[0]).not.toBeNaN();
+  it("rolling VWAP returns values after period warmup", () => {
+    const result = vwap(SAMPLE_CANDLES, 20);
+    // First 19 values should be NaN (rolling window not full)
+    for (let i = 0; i < 19; i++) {
+      expect(result[i]).toBeNaN();
+    }
+    // From index 19 onwards, should have values
+    expect(result[19]).not.toBeNaN();
+    expect(result[50]).not.toBeNaN();
   });
 
   it("returns NaN for zero-volume candles", () => {
     const zeroVol = FLAT_CANDLES.map((c) => ({ ...c, volume: 0 }));
-    const result = vwap(zeroVol);
+    const result = vwap(zeroVol, 20);
     for (const v of result) {
       expect(v).toBeNaN();
+    }
+  });
+
+  it("rolling VWAP is between low and high of window", () => {
+    const result = vwap(SAMPLE_CANDLES, 10);
+    for (let i = 9; i < SAMPLE_CANDLES.length; i++) {
+      if (isNaN(result[i])) continue;
+      // VWAP should be in a reasonable range around prices
+      let minLow = Infinity, maxHigh = -Infinity;
+      for (let j = i - 9; j <= i; j++) {
+        if (SAMPLE_CANDLES[j].low < minLow) minLow = SAMPLE_CANDLES[j].low;
+        if (SAMPLE_CANDLES[j].high > maxHigh) maxHigh = SAMPLE_CANDLES[j].high;
+      }
+      expect(result[i]).toBeGreaterThanOrEqual(minLow);
+      expect(result[i]).toBeLessThanOrEqual(maxHigh);
     }
   });
 });

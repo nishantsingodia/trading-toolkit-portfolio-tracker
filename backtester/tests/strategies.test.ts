@@ -63,10 +63,10 @@ describe("Supertrend Strategy", () => {
 });
 
 describe("VWAP Crossover", () => {
-  it("generates signals on price/VWAP crossings", () => {
-    const signals = vwapCrossover(SAMPLE_CANDLES, { anchor: "day" });
-    // Daily candles: each day resets VWAP to typical price, so crossovers happen
-    expect(signals.length).toBeGreaterThanOrEqual(0);
+  it("generates signals on price/rolling-VWAP crossings", () => {
+    const signals = vwapCrossover(SAMPLE_CANDLES, { period: 20 });
+    // Rolling VWAP on daily candles acts as volume-weighted MA — should produce crossovers
+    expect(signals.length).toBeGreaterThan(0);
   });
 });
 

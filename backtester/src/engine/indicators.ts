@@ -271,33 +271,53 @@ export function supertrend(
 
 /**
  * Volume Weighted Average Price.
- * Cumulative (typical_price * volume) / cumulative volume.
- * For daily candles, no reset is needed. For intraday, resets each day.
+ * For intraday candles: resets each day (anchor="day").
+ * For daily candles: uses rolling N-day window (anchor="rolling", default period=20).
+ * Rolling VWAP acts as a volume-weighted moving average — useful as a
+ * fair-value anchor on daily timeframes where cumulative VWAP converges
+ * to a near-flat line and single-bar VWAP = typical price (useless).
  */
-export function vwap(candles: Candle[]): number[] {
+export function vwap(candles: Candle[], period: number = 20): number[] {
   const len = candles.length;
   const result = new Array<number>(len).fill(NaN);
 
-  let cumTPV = 0;
-  let cumVol = 0;
-  let lastDate = "";
+  // Detect if data is daily (each candle is a different date)
+  const isDaily =
+    len >= 2 &&
+    candles[0].timestamp.slice(0, 10) !== candles[1].timestamp.slice(0, 10);
 
-  for (let i = 0; i < len; i++) {
-    const currentDate = candles[i].timestamp.slice(0, 10);
-
-    // Reset on new day (for intraday data)
-    if (currentDate !== lastDate) {
-      cumTPV = 0;
-      cumVol = 0;
-      lastDate = currentDate;
+  if (isDaily) {
+    // Rolling VWAP: volume-weighted typical price over last `period` bars
+    for (let i = period - 1; i < len; i++) {
+      let cumTPV = 0;
+      let cumVol = 0;
+      for (let j = i - period + 1; j <= i; j++) {
+        const tp = (candles[j].high + candles[j].low + candles[j].close) / 3;
+        cumTPV += tp * candles[j].volume;
+        cumVol += candles[j].volume;
+      }
+      result[i] = cumVol !== 0 ? cumTPV / cumVol : NaN;
     }
+  } else {
+    // Intraday: reset cumulative VWAP each day
+    let cumTPV = 0;
+    let cumVol = 0;
+    let lastDate = "";
 
-    const tp = (candles[i].high + candles[i].low + candles[i].close) / 3;
-    cumTPV += tp * candles[i].volume;
-    cumVol += candles[i].volume;
-
-    result[i] = cumVol !== 0 ? cumTPV / cumVol : NaN;
+    for (let i = 0; i < len; i++) {
+      const currentDate = candles[i].timestamp.slice(0, 10);
+      if (currentDate !== lastDate) {
+        cumTPV = 0;
+        cumVol = 0;
+        lastDate = currentDate;
+      }
+      const tp = (candles[i].high + candles[i].low + candles[i].close) / 3;
+      cumTPV += tp * candles[i].volume;
+      cumVol += candles[i].volume;
+      result[i] = cumVol !== 0 ? cumTPV / cumVol : NaN;
+    }
   }
+
   return result;
 }
 
@@ -477,6 +497,39 @@ export function crossunder(a: number[], b: number[], i: number): boolean {
     a[i - 1] >= b[i - 1] &&
     a[i] < b[i]
   );
+}
+
+/**
+ * Donchian Channels — highest high / lowest low over lookback periods.
+ * Used by Turtle Trading system.
+ */
+export function donchian(
+  highs: number[],
+  lows: number[],
+  entryPeriod: number,
+  exitPeriod: number
+): { upper: number[]; lower: number[] } {
+  const len = highs.length;
+  const upper = new Array<number>(len).fill(NaN);
+  const lower = new Array<number>(len).fill(NaN);
+
+  for (let i = entryPeriod; i < len; i++) {
+    let maxH = -Infinity;
+    for (let j = i - entryPeriod; j < i; j++) {
+      if (highs[j] > maxH) maxH = highs[j];
+    }
+    upper[i] = maxH;
+  }
+
+  for (let i = exitPeriod; i < len; i++) {
+    let minL = Infinity;
+    for (let j = i - exitPeriod; j < i; j++) {
+      if (lows[j] < minL) minL = lows[j];
+    }
+    lower[i] = minL;
+  }
+
+  return { upper, lower };
 }
 
 /** Calculate daily return percentage for each candle */

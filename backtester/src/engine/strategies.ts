@@ -128,12 +128,12 @@ export function supertrendStrategy(
   return signals;
 }
 
-/** VWAP Crossover — long above VWAP, short below */
+/** VWAP Crossover — rolling VWAP on daily candles acts as volume-weighted MA */
 export function vwapCrossover(
   candles: Candle[],
-  _params: VwapCrossoverParams
+  params: VwapCrossoverParams
 ): Signal[] {
-  const vwapValues = calcVwap(candles);
+  const vwapValues = calcVwap(candles, params.period);
   const closes = candles.map((c) => c.close);
   const signals: Signal[] = [];
 
@@ -144,7 +144,7 @@ export function vwapCrossover(
         type: "BUY",
         price: candles[i].close,
         date: candles[i].timestamp,
-        reason: "Price crossed above VWAP",
+        reason: `Price crossed above VWAP(${params.period})`,
       });
     } else if (crossunder(closes, vwapValues, i)) {
       signals.push({
@@ -152,7 +152,7 @@ export function vwapCrossover(
         type: "SELL",
         price: candles[i].close,
         date: candles[i].timestamp,
-        reason: "Price crossed below VWAP",
+        reason: `Price crossed below VWAP(${params.period})`,
       });
     }
   }
@@ -516,10 +516,10 @@ export const STRATEGY_REGISTRY: Record<StrategyName, StrategyEntry> = {
   },
   vwap_crossover: {
     name: "vwap_crossover",
-    fn: (c, p) => vwapCrossover(c, { anchor: String(p.anchor) }),
-    defaults: { anchor: "day" },
-    description: "VWAP crossover for intraday/swing",
-    regimes: ["range_bound"],
+    fn: (c, p) => vwapCrossover(c, { period: Number(p.period) }),
+    defaults: { period: 20 },
+    description: "Rolling VWAP crossover (volume-weighted MA)",
+    regimes: ["range_bound", "trending_up"],
   },
   rsi_overbought_oversold: {
     name: "rsi_overbought_oversold",
