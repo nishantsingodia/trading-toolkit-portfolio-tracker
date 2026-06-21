@@ -1,14 +1,21 @@
+import os
+import sys
 import urllib.parse
 import webbrowser
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import requests
 from access_token_store import save_access_token
 
-# CONFIG
-api_key = 'REDACTED_UPSTOX_API_KEY'
-secret_key = 'REDACTED_UPSTOX_API_SECRET'
-redirect_uri = 'http://localhost:8787/callback'
+# CONFIG — credentials are read from the environment, never hardcoded.
+#   export UPSTOX_API_KEY=...
+#   export UPSTOX_API_SECRET=...
+api_key = os.environ.get('UPSTOX_API_KEY')
+secret_key = os.environ.get('UPSTOX_API_SECRET')
+redirect_uri = os.environ.get('UPSTOX_REDIRECT_URI', 'http://localhost:8787/callback')
 port = 8787
+
+if not api_key or not secret_key:
+    sys.exit('❌ Set UPSTOX_API_KEY and UPSTOX_API_SECRET environment variables before running.')
 
 def get_auth_code():
     encoded_redirect_uri = urllib.parse.quote(redirect_uri, safe='')
