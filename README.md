@@ -1,7 +1,13 @@
-# Upstox MCP Server
+# Trading Toolkit & Portfolio Tracker
 
-A MCP server for integrating with the Upstox trading API.
-There is no official MCP server for Upstox, so this is our implementation of a MCP server for Upstox to get information from our account.
+A full-stack trading toolkit built on Cloudflare Workers (Durable Objects + SQLite). It started as an Upstox MCP server and grew into:
+
+- **Signal Scanner** — 6 equity strategies (BB_RSI, STOCH_RSI, RSI_OBOS, CANSLIM, DUAL_MOM, SUPERTREND) scored across a configurable stock universe
+- **Portfolio Tracker** — trade log, P&L, and strategy-bucketed positions
+- **Backtesters** — an equity strategy engine and a 12-strategy F&O backtester
+- **Upstox MCP server** — natural-language access to your Upstox account via Claude Desktop / Cursor
+
+> ⚠️ **Disclaimer — not financial advice.** This project is for **educational and personal-research purposes only**. Nothing here is investment advice or a recommendation to buy or sell any security. Signals and backtest results are illustrative, may contain bugs, and are **not** indicative of future returns. Trading involves substantial risk of loss. You are solely responsible for any decisions made with this software. The author accepts no liability for any losses. See [LICENSE](LICENSE) (provided "as is", without warranty).
 
 ## Quick Start
 
@@ -9,8 +15,8 @@ There is no official MCP server for Upstox, so this is our implementation of a M
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/Finance-LLMs/Upstox-MCP-Server.git
-cd Upstox-MCP-Server
+git clone https://github.com/nishantsingodia/trading-toolkit-portfolio-tracker.git
+cd trading-toolkit-portfolio-tracker
 ```
 
 2. Install dependencies:
