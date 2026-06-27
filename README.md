@@ -1,23 +1,38 @@
 # Trading Toolkit & Portfolio Tracker
 
-A full-stack trading toolkit built on **Cloudflare Workers** (Durable Objects + embedded SQLite). What began as an [Upstox](https://upstox.com/) MCP server grew into a self-contained signal scanner, portfolio tracker, and backtesting suite — all running from a single edge worker with no external database.
+> An NSE signal scanner, a trade-attribution portfolio tracker, and two backtesting engines — equity and F&O options — running from a **single Cloudflare Worker** with **no external database**. Started life as an [Upstox](https://upstox.com/) MCP server; grew into a full-stack edge app.
 
-> ⚠️ **Disclaimer — not financial advice.** This project is for **educational and personal-research purposes only**. Nothing here is investment advice or a recommendation to buy or sell any security. Signals and backtest results are illustrative, may contain bugs, and are **not** indicative of future returns. Trading involves substantial risk of loss. You are solely responsible for any decisions made with this software. The author accepts no liability for any losses. See [LICENSE](LICENSE) (provided "as is", without warranty).
+A personal trading-research toolkit for the Indian market, built end-to-end by a product leader who wanted to understand the domain by building it rather than reading about it.
+
+> ⚠️ **Not financial advice.** This is an **educational and personal-research** project. Signals are illustrative and backtest results are an explicit work-in-progress (see [Honest scope & caveats](#honest-scope--caveats) — I audited my own numbers and they are *not* investment-grade). Trading involves substantial risk of loss. You are solely responsible for any decisions made with this software. Provided "as is", no warranty — see [LICENSE](LICENSE).
+
+**Signal Scanner** — 6 strategies scored across the NSE universe, ranked by cross-strategy consensus:
+
+![Signal Scanner — 6 equity strategies scored across the NSE universe, ranked by consensus](img/scanner.png)
+
+---
+
+## Why I built it
+
+I'm a product leader who works on fintech at scale, and I wanted my own hands on the messy parts: pulling candles through a rate-limited broker API, deciding what a "signal" actually means, modelling trading frictions honestly, and reasoning about where a backtest stops telling the truth. So I built a research tool around a real personal itch — finding and tracking trades on NSE — and let it grow from a thin MCP wrapper into a full-stack system. The interesting part isn't any single feature; it's the end-to-end product judgment: scoping, shipping on a constrained runtime, and being candid about what the system can and can't be trusted to say.
 
 ---
 
 ## What it does
 
-| Module | Description |
-|--------|-------------|
-| 📈 **Signal Scanner** | Scans a universe of **251 NSE stocks** (large + mid cap) across **6 equity strategies**, ranks them by cross-strategy consensus, and surfaces fresh buy/sell signals. |
-| 💼 **Portfolio Tracker** | Records BUY/SELL trades, computes live P&L, and buckets positions by the strategy that triggered them. |
-| 🔁 **Backtesters** | An equity strategy engine (multiple strategies + indicators + optimizer) and a separate **12-strategy F&O backtester** (straddles, iron condors, spreads, …). |
-| 🤖 **Upstox MCP Server** | Natural-language access to your Upstox account (holdings, positions, orders, funds) from Claude Desktop / Cursor. |
+- **Signal Scanner** — scans an NSE large/mid-cap universe (~250 stocks) across **6 curated equity strategies** (BB_RSI, STOCH_RSI, RSI_OBOS, CANSLIM, DUAL_MOM, SUPERTREND), then ranks by cross-strategy consensus. Each stock gets a **fingerprint** summarising every strategy verdict and a signal type — `FRESH_BUY` (today), `RECENT_BUY` (1–3d), `BULLISH`, `BEARISH`, `NEUTRAL`.
+- **Portfolio Tracker** — records BUY/SELL trades, computes P&L, and **buckets every position by the strategy that triggered the entry** (the fingerprint is auto-stamped onto the trade), so you can ask "how is my CANSLIM book doing?" rather than just "how is my book doing?"
+- **Equity backtester** — a 10-strategy registry with a parameter optimizer and a strategy-comparison engine, with realistic frictions: next-bar (open) execution to avoid look-ahead, per-side slippage, and an itemized Zerodha equity-delivery cost model (STT, exchange txn, SEBI, stamp duty, DP, GST).
+- **F&O options backtester** — a separate **12-strategy** engine (short straddle/strangle, iron condor, iron butterfly, deep-OTM sell, bull-call / bear-put spreads, long straddle, calendar spread, and more) with Black-Scholes pricing, Greeks aggregation, an India expiry calendar, a portfolio risk manager (delta/gamma/vega limits, daily loss cap), and India F&O cost modelling.
+- **Upstox MCP server** — natural-language access to your Upstox account (profile, funds/margin, holdings, positions, MTF, order book, order & trade history) from Claude Desktop or Cursor over MCP.
+- **Single-page web UI** — 4 tabs: Signal Scanner · F&O Signals · Watchlist · Portfolio.
+- **Standard backtest metrics** — CAGR, annualized Sharpe, max drawdown, win rate, profit factor, expectancy (see the caveats on how far to trust the headline numbers).
 
 ---
 
-## Architecture
+## How it's built
+
+**Stack:** TypeScript · Cloudflare Workers + Durable Objects (embedded SQLite) · Workers KV · Hono · Model Context Protocol (MCP over SSE) · Zod · Upstox REST API + OAuth 2.0 · Vitest · Biome · Wrangler · Python (offline backtest/data scripts).
 
 ```
 ┌─────────────────────────── Cloudflare Worker ───────────────────────────┐
@@ -40,21 +55,13 @@ A full-stack trading toolkit built on **Cloudflare Workers** (Durable Objects + 
                   Upstox REST API (candles, quotes, holdings, orders)
 ```
 
-**Highlights**
-- **No external DB** — state lives in SQLite *inside* the Durable Object, so the whole app is one deployable worker.
-- **Resilient data layer** — rolling 1-year candle cache with gap-fill, batched fetches, and exponential-backoff retry to survive Upstox's HTTP 429 rate limits.
-- **Long-running scans** — a full 251-stock scan (~90s) runs inside the Durable Object, sidestepping the Workers 30s request timeout.
+A few decisions I'd call out:
 
----
-
-## Tech stack
-
-- **Runtime:** Cloudflare Workers + Durable Objects, Workers KV
-- **Storage:** SQLite (embedded in the Durable Object)
-- **Language:** TypeScript
-- **Tooling:** Wrangler, Vitest, Biome
-- **Auth:** Upstox OAuth 2.0
-- **Protocol:** Model Context Protocol (MCP) over SSE
+- **Zero external database.** All application state — watchlist, candle cache, scan snapshots, equity + F&O positions, config — lives in SQLite *embedded inside a single Durable Object*. The whole app deploys as one worker; there's nothing else to provision.
+- **One pure-function indicator library, shared everywhere.** RSI (proper Wilder's smoothing), SMA/EMA, MACD, Bollinger Bands, Stochastic, Supertrend, ATR — all arrays-in / arrays-out, used identically by the live scanner and the backtester so a signal means the same thing in research and in production.
+- **A data layer that survives a flaky, rate-limited broker.** Upstox 429s after a burst of requests, so candles are fetched in batches of 3 with 1s spacing and exponential-backoff retry, on top of a rolling 1-year cache with gap-fill. A full ~250-stock scan takes ~90s and runs *inside* the Durable Object to sidestep the Workers 30s request timeout.
+- **Attribution baked into the data model.** The consensus fingerprint is computed at scan time and stamped onto every trade, so the portfolio can be sliced by originating strategy rather than reverse-engineered later.
+- **Tested.** ~270 Vitest cases across the MCP tools, the equity engine, and the F&O engine (indicators, strategies, pricing, metrics, risk-manager, expiry-calendar).
 
 ---
 
@@ -69,67 +76,48 @@ A full-stack trading toolkit built on **Cloudflare Workers** (Durable Objects + 
 | **DUAL_MOM** | Price > SMA200, top 75% of 52-week range, MACD > 0 | Price < SMA200 **or** MACD < 0 |
 | **SUPERTREND** | Price crosses above Supertrend(10, 3) | Price crosses below |
 
-Each stock gets a consensus **fingerprint** (e.g. `BB_RSI:FRESH_BUY* | STOCH_RSI:BULLISH | RSI_OBOS:- | …`) and signal type: `FRESH_BUY` (today), `RECENT_BUY` (1–3d), `BULLISH`, `BEARISH`, `NEUTRAL`. Indicators (RSI, SMA, Bollinger, Stochastic, MACD, Supertrend) are implemented as pure functions.
+---
 
-The **F&O backtester** (`fno-backtester/`) runs 12 options strategies — short straddle, iron condor, bull-call spread, and more — with its own pricing, risk-manager, and expiry-calendar engines.
+## Honest scope & caveats
+
+This section is deliberately blunt, because intellectual honesty about a model is the point. I ran a correctness audit on my own toolkit; the **signal/indicator math is sound, but the reported P&L and returns are not yet trustworthy.** Treat them as a work-in-progress, not credible performance numbers, and never as investment advice.
+
+- **Backtest P&L / CAGR / Sharpe are not investment-grade.** The metric functions themselves are individually correct, but they inherit the equity curve they're fed — and that curve has the issues below — so the headline percentages are directional at best.
+- **The portfolio tracker can misstate realized P&L.** Trade import/dedup keys on `(symbol, action, price, quantity, trade_date)` and P&L is gross sell-revenue minus buy-cost rather than **FIFO lot matching**, which can double-count. Fixing this to proper FIFO is the known next step.
+- **The F&O backtester uses _synthetic_ option prices.** There is no real historical option-chain data — premiums are Black-Scholes from spot + a backward-looking IV estimate, with no bid-ask spread. My own [`fno-backtester/AUDIT.md`](fno-backtester/AUDIT.md) catalogues this and other issues as CRITICAL/HIGH and concludes that **all absolute F&O P&L figures are directional indicators at best, not forecasts.** What it *is* good for: relative ranking of strategies, win-rate patterns, regime behavior, and finding strategies to avoid.
+- **Single-user, local-first.** Runs at `localhost:8787`; no multi-tenant auth, no live deployment URL. It depends on a personal Upstox account and a ~6-hour OAuth token (which has silently expired on me before — token-expiry handling exists because of that).
+- **The "one worker" story is the core app.** Some peripheral local tooling reaches outside the Worker (e.g. a sync endpoint that talks to `localhost:9876`); the single-deployable-worker claim is about the scanner/portfolio/MCP core, not the full local toolchain.
 
 ---
 
-## Screenshots
+## Run it locally
 
-> _TODO: add screenshots of the Signal Scanner and Portfolio tabs here — they're the most compelling part of the UI._
-> _e.g._ `![Signal Scanner](img/scanner.png)`
-
-MCP integration in action:
-
-![Available tools](img/available-tools.png)
-![Successful tool call](img/mcp-inspector-successful-tool-call.png)
-
----
-
-## Quick Start
-
-### Setup
-
-1. Clone the repository:
 ```bash
 git clone https://github.com/nishantsingodia/trading-toolkit-portfolio-tracker.git
 cd trading-toolkit-portfolio-tracker
-```
-
-2. Install dependencies:
-```bash
 npm install
 ```
 
-3. Create a `.dev.vars` file with your Upstox app credentials (see `.dev.vars.example`):
+Create `.dev.vars` with your Upstox app credentials (see `.dev.vars.example`):
+
 ```
 UPSTOX_API_KEY=your_api_key
 UPSTOX_API_SECRET=your_api_secret
 UPSTOX_ACCESS_TOKEN=your_access_token
 ```
-> 🔒 Never commit `.dev.vars` — it's gitignored. Credentials are read from the environment, never hardcoded.
 
-### Run the Server
-
-```bash
-npm run start
-```
-
-The app runs at `http://localhost:8787` — open it in a browser for the UI, or point an MCP client at `/sse`. Authenticate via the badge in the UI (Upstox OAuth → token saved to the embedded DB).
-
-### Test
+> 🔒 `.dev.vars` is gitignored. Credentials are read from the environment, never hardcoded.
 
 ```bash
-npm test
+npm run start   # wrangler dev on http://localhost:8787
+npm test        # ~270 Vitest cases
 ```
 
----
+Open `http://localhost:8787` for the UI, or point an MCP client at `/sse`. Authenticate via the badge in the UI (Upstox OAuth → token saved to the embedded DB).
 
-## MCP Configuration
+### MCP client config
 
-### Claude Desktop
-
+**Claude Desktop**
 ```json
 {
   "mcpServers": {
@@ -141,30 +129,22 @@ npm test
 }
 ```
 
-### Cursor (`~/.cursor/mcp.json`)
-
+**Cursor** (`~/.cursor/mcp.json`)
 ```json
 {
   "mcpServers": {
-    "mcp-server-upstox-api": {
-      "url": "http://localhost:8787/sse"
-    }
+    "mcp-server-upstox-api": { "url": "http://localhost:8787/sse" }
   }
 }
 ```
 
-### Example prompts
-
-- "What's my Upstox profile information?"
-- "What's my available margin in the equity segment?"
-- "What stocks do I currently hold, and their current values?"
-- "What are my open positions and their unrealized P&L?"
-- "Show me my trades for today."
-- "Show me the details / history / trades of order ID `xxxxxxxxxxxxxxx`."
+Example prompts: _"What's my available margin in the equity segment?"_ · _"What stocks do I hold and their current values?"_ · _"What are my open positions and unrealized P&L?"_ · _"Show me the trades for order ID `xxx`."_
 
 ---
 
-## API Routes
+## API & MCP reference
+
+**REST routes**
 
 | Route | Method | Description |
 |-------|--------|-------------|
@@ -176,24 +156,11 @@ npm test
 | `/api/cache` | DELETE | Force a cache refresh |
 | `/api/fno/scan` | GET | F&O options-chain analysis |
 
-### Upstox MCP tools
-
-| Tool | Description |
-|------|-------------|
-| `get-profile` | User profile information |
-| `get-funds-margin` | Funds and margin (`SEC` equity / `COM` commodity) |
-| `get-holdings` | Long-term holdings |
-| `get-positions` | Short-term positions |
-| `get-mtf-positions` | Margin Trade Funding positions |
-| `get-order-book` | Current-day orders and status |
-| `get-order-details` | Detail for a specific order ID |
-| `get-order-trades` | Trades executed for an order ID |
-| `get-order-history` | Order history by order ID or tag |
-| `get-trades` | Trades executed for the current day |
+**Upstox MCP tools:** `get-profile` · `get-funds-margin` · `get-holdings` · `get-positions` · `get-mtf-positions` · `get-order-book` · `get-order-details` · `get-order-trades` · `get-order-history` · `get-trades`
 
 ---
 
-## Project Structure
+## Project structure
 
 ```
 src/
@@ -204,15 +171,27 @@ src/
     get-*.ts            # MCP tool wrappers for Upstox endpoints
     run-backtest.ts     # Equity backtest runner
     run-fno-backtest.ts # F&O backtest runner
-  data/
-    stock-master.ts     # 251-stock universe with instrument keys
+  data/stock-master.ts  # NSE universe with instrument keys
   constants/            # API base URL, headers
 static/index.html       # Single-page UI (Scanner · F&O · Watchlist · Portfolio)
-backtester/             # Equity strategy engine + optimizer
-fno-backtester/         # 12-strategy F&O backtester (pricing, risk, expiry calendar)
+backtester/             # Equity engine (10-strategy registry + optimizer)
+fno-backtester/         # 12-strategy F&O engine + AUDIT.md (pricing, risk, expiry)
 ```
 
 ---
+
+## MCP integration, in action
+
+![Available tools](img/available-tools.png)
+![Successful tool call](img/mcp-inspector-successful-tool-call.png)
+
+---
+
+## About the author
+
+Built by **Nishant Singodia** — Director of Product (7+ yrs), B.Tech IIT Kharagpur, based in Mumbai. I lead revenue, payments, and platform products at consumer-fintech scale (Dream11, ~250M+ users; founding product at an AI-first SEBI-registered broking platform), and I build 0→1 myself — this repo is one of those builds.
+
+[GitHub](https://github.com/nishantsingodia) · [LinkedIn](https://linkedin.com/in/nishantsingodia) · nishantsingodia@gmail.com
 
 ## License
 
