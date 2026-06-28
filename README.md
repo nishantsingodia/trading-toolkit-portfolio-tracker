@@ -4,9 +4,9 @@
 
 A personal trading-research toolkit for the Indian market, built end-to-end by a product leader who wanted to understand the domain by building it rather than reading about it.
 
-> ⚠️ **Not financial advice.** This is an **educational and personal-research** project. Signals are illustrative and backtest results are an explicit work-in-progress (see [Honest scope & caveats](#honest-scope--caveats) — I audited my own numbers and they are *not* investment-grade). Trading involves substantial risk of loss. You are solely responsible for any decisions made with this software. Provided "as is", no warranty — see [LICENSE](LICENSE).
+> ⚠️ **Not financial advice.** This is an **educational and personal-research** project. Signals are illustrative and backtest results are an explicit work-in-progress (see [Honest scope & caveats](#honest-scope--caveats). Trading involves substantial risk of loss. You are solely responsible for any decisions made with this software. Provided "as is", no warranty — see [LICENSE](LICENSE).
 
-**Signal Scanner** — 6 strategies scored across the NSE universe, ranked by cross-strategy consensus:
+**Signal Scanner** — 6 strategies scored across the Indian Stock Market universe, ranked by cross-strategy consensus:
 
 ![Signal Scanner — 6 equity strategies scored across the NSE universe, ranked by consensus](img/scanner.png)
 
@@ -14,7 +14,7 @@ A personal trading-research toolkit for the Indian market, built end-to-end by a
 
 ## Why I built it
 
-I'm a product leader who works on fintech at scale, and I wanted my own hands on the messy parts: pulling candles through a rate-limited broker API, deciding what a "signal" actually means, modelling trading frictions honestly, and reasoning about where a backtest stops telling the truth. So I built a research tool around a real personal itch — finding and tracking trades on NSE — and let it grow from a thin MCP wrapper into a full-stack system. The interesting part isn't any single feature; it's the end-to-end product judgment: scoping, shipping on a constrained runtime, and being candid about what the system can and can't be trusted to say.
+I'm a product leader who works on fintech at scale, and I wanted my own hands on the messy parts: pulling candles through a rate-limited broker API, deciding what a "signal" actually means, modelling trading frictions honestly, and reasoning about where a backtest stops telling the truth. So I built a research tool around a real personal itch — finding and tracking trades — and let it grow from a thin MCP wrapper into a full-stack system. The interesting part isn't any single feature; it's the end-to-end product judgment: scoping, shipping on a constrained runtime, and being candid about what the system can and can't be trusted to say.
 
 ---
 
@@ -22,7 +22,7 @@ I'm a product leader who works on fintech at scale, and I wanted my own hands on
 
 - **Signal Scanner** — scans an NSE large/mid-cap universe (~250 stocks) across **6 curated equity strategies** (BB_RSI, STOCH_RSI, RSI_OBOS, CANSLIM, DUAL_MOM, SUPERTREND), then ranks by cross-strategy consensus. Each stock gets a **fingerprint** summarising every strategy verdict and a signal type — `FRESH_BUY` (today), `RECENT_BUY` (1–3d), `BULLISH`, `BEARISH`, `NEUTRAL`.
 - **Portfolio Tracker** — records BUY/SELL trades, computes P&L, and **buckets every position by the strategy that triggered the entry** (the fingerprint is auto-stamped onto the trade), so you can ask "how is my CANSLIM book doing?" rather than just "how is my book doing?"
-- **Equity backtester** — a 10-strategy registry with a parameter optimizer and a strategy-comparison engine, with realistic frictions: next-bar (open) execution to avoid look-ahead, per-side slippage, and an itemized Zerodha equity-delivery cost model (STT, exchange txn, SEBI, stamp duty, DP, GST).
+- **Equity backtester** — a 25+ strategy registry with a parameter optimizer and a strategy-comparison engine, with realistic frictions: next-bar (open) execution to avoid look-ahead, per-side slippage, and an itemized Zerodha equity-delivery cost model (STT, exchange txn, SEBI, stamp duty, DP, GST).
 - **F&O options backtester** — a separate **12-strategy** engine (short straddle/strangle, iron condor, iron butterfly, deep-OTM sell, bull-call / bear-put spreads, long straddle, calendar spread, and more) with Black-Scholes pricing, Greeks aggregation, an India expiry calendar, a portfolio risk manager (delta/gamma/vega limits, daily loss cap), and India F&O cost modelling.
 - **Upstox MCP server** — natural-language access to your Upstox account (profile, funds/margin, holdings, positions, MTF, order book, order & trade history) from Claude Desktop or Cursor over MCP.
 - **Single-page web UI** — 4 tabs: Signal Scanner · F&O Signals · Watchlist · Portfolio.
