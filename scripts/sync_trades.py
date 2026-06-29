@@ -301,6 +301,8 @@ def import_fno_trades_to_panel(fno_trades: list):
                 "action": t.get("action", "SELL"),
                 "price": t.get("price", 0),
                 "lots": t.get("lots", 1),
+                "trade_date": t.get("trade_date", ""),  # send the REAL trade date so the panel stops stamping the run-date (which caused daily re-import dupes)
+                "lot_size": t.get("lot_size", 0),         # send the contract's real lot size if the parser has it (0 = let panel decide)
                 "strategy": strategy,
                 "broker": t.get("broker", "MANUAL"),
                 "position_id": position_id,

@@ -649,7 +649,14 @@ export class MyMCP extends McpAgent {
 					const posId = position_id || `pos_${Date.now()}`;
 					const today = new Date().toISOString().slice(0, 10);
 					const time = new Date().toISOString().slice(11, 16);
-					const lotSize = underlying === "BANKNIFTY" ? 30 : 75;
+					// Use the REAL trade date from the contract note when supplied; fall back to today only for
+					// manual entry. Stamping the sync run-date here is what let the same note re-import every day.
+					const tradeDate = (typeof body.trade_date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(body.trade_date))
+						? body.trade_date
+						: today;
+					// Lot size: trust an explicit value from the contract note; else BANKNIFTY=35 (was wrongly 30).
+					// FINNIFTY/MIDCPNIFTY/SENSEX/BANKEX still fall back to 75 — confirm those or have the parser send lot_size.
+					const lotSize = Number(body.lot_size) > 0 ? Number(body.lot_size) : (underlying === "BANKNIFTY" ? 35 : 75);
 					const source = body.source || "MANUAL";
 
 					// If this is from a contract note, delete any MANUAL entries for the same contract
@@ -664,13 +671,13 @@ export class MyMCP extends McpAgent {
 					const existing = [...(this as any).sql`SELECT id FROM fno_positions
 						WHERE underlying = ${underlying} AND expiry = ${expiry} AND strike = ${strike}
 						AND option_type = ${option_type} AND action = ${action} AND entry_price = ${price}
-						AND entry_date = ${today} LIMIT 1`] as any[];
+						AND lots = ${lots || 1} AND entry_date = ${tradeDate} LIMIT 1`] as any[];
 					if (existing.length > 0) {
 						return json({ success: true, position_id: posId, id: "skipped_duplicate" });
 					}
 
 					(this as any).sql`INSERT INTO fno_positions (position_id, underlying, expiry, strike, option_type, action, lots, lot_size, entry_price, entry_date, entry_time, strategy, broker, source)
-						VALUES (${posId}, ${underlying}, ${expiry}, ${strike}, ${option_type}, ${action}, ${lots || 1}, ${lotSize}, ${price}, ${today}, ${time}, ${strategy || 'manual'}, ${broker || 'MANUAL'}, ${source})`;
+						VALUES (${posId}, ${underlying}, ${expiry}, ${strike}, ${option_type}, ${action}, ${lots || 1}, ${lotSize}, ${price}, ${tradeDate}, ${time}, ${strategy || 'manual'}, ${broker || 'MANUAL'}, ${source})`;
 					return json({ success: true, position_id: posId, id: "created" });
 				}
 

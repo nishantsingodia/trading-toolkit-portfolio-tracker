@@ -634,10 +634,10 @@ function classifyRsiObos(
 
 function classifyCanslim(
   sma50Arr: number[], rsiArr: number[], volAvg20: number[], volumes: number[],
-  highs: number[], closes: number[], last: number
+  highs: number[], closes: number[], last: number, entryPrice: number | null = null
 ): StrategySignal {
   // BUY: price > SMA50 AND vol > 1.5× avg AND within 10% of 52W high AND RSI 50-80
-  // SELL: price < SMA50 (or -8% stop tracked externally)
+  // SELL: price < SMA50  OR  -8% hard stop from entry price (only for held positions — mirrors the backtest exit)
   const i = last;
   if (i < 252 || isNaN(sma50Arr[i]) || isNaN(rsiArr[i]) || isNaN(volAvg20[i]) || volAvg20[i] === 0) {
     return { strategy: "CANSLIM", signal: "NEUTRAL", trigger_price: null, days_since: null, indicators: {} };
@@ -652,7 +652,13 @@ function classifyCanslim(
 
   const isBuy = aboveSma && highVol && nearHigh && rsiOk;
   const prevAboveSma = i > 0 && closes[i-1] > sma50Arr[i-1];
-  const isSell = !aboveSma && prevAboveSma;
+  // -8% protective stop: only meaningful when we actually hold the stock (entryPrice known).
+  // Mirrors the backtest's in_pos "-8% from entry" exit that the live signal was missing.
+  // Unlike the SMA50 cross (edge-triggered on the crossing day), the stop stays SELL every day
+  // the position is ≥8% underwater, so the exit prompt persists until acted on.
+  const lossPct = entryPrice != null && entryPrice > 0 ? ((closes[i] - entryPrice) / entryPrice) * 100 : null;
+  const stopLossHit = lossPct != null && lossPct <= -8;
+  const isSell = (!aboveSma && prevAboveSma) || stopLossHit;
 
   let signal: SignalType = "NEUTRAL";
   let days_since: number | null = null;
@@ -689,6 +695,16 @@ function classifyCanslim(
   const sellConditions: Condition[] = [
     { label: "Price < SMA50", threshold: curSma50, current: curClose, met: !aboveSma, gap: aboveSma ? `+${r2(((closes[i] - sma50Arr[i]) / sma50Arr[i]) * 100)}% above` : `${r2(((sma50Arr[i] - closes[i]) / sma50Arr[i]) * 100)}% below` },
   ];
+  // Surface the -8% stop only when we know the entry price (i.e. it's a held position)
+  if (lossPct != null) {
+    sellConditions.push({
+      label: "-8% stop from entry",
+      threshold: entryPrice != null ? `≤ ${r2(entryPrice * 0.92)}` : "-8%",
+      current: curClose,
+      met: stopLossHit,
+      gap: stopLossHit ? `${r2(lossPct)}% — STOP HIT` : `${r2(lossPct)}% from entry`,
+    });
+  }
 
   return {
     strategy: "CANSLIM", signal,
@@ -1052,6 +1068,18 @@ export async function scanWatchlistHandler(
     const posRows = [...agent.sql`SELECT symbol, SUM(CASE WHEN action='BUY' THEN quantity ELSE -quantity END) as net_qty FROM positions GROUP BY symbol HAVING net_qty > 0`];
     const invested = new Set((posRows as any[]).map((r: any) => r.symbol));
 
+    // Weighted-avg entry price for currently-held stocks → feeds the CANSLIM -8% protective stop.
+    // Only held stocks (net_qty > 0) get an entry price; everything else passes null (no stop).
+    const entryPriceRows = [...agent.sql`SELECT symbol,
+        SUM(CASE WHEN action='BUY' THEN price * quantity ELSE 0 END) as buy_cost,
+        SUM(CASE WHEN action='BUY' THEN quantity ELSE 0 END) as buy_qty,
+        SUM(CASE WHEN action='BUY' THEN quantity ELSE -quantity END) as net_qty
+      FROM positions GROUP BY symbol HAVING net_qty > 0`];
+    const entryPriceMap = new Map<string, number>();
+    for (const r of entryPriceRows as any[]) {
+      if (r.buy_qty > 0) entryPriceMap.set(r.symbol, r.buy_cost / r.buy_qty);
+    }
+
     // Get entry strategies + fingerprints for invested stocks
     const entryStratRows = [...agent.sql`SELECT p.symbol, p.signal_strategy, p.signal_fingerprint, p.portfolio FROM positions p
       INNER JOIN (SELECT symbol, MAX(id) as max_id FROM positions WHERE action='BUY' AND (signal_strategy IS NOT NULL OR signal_fingerprint IS NOT NULL) GROUP BY symbol) latest
@@ -1138,7 +1166,7 @@ export async function scanWatchlistHandler(
         classifyBbRsi(bbResult.upper, bbResult.middle, bbResult.lower, rsiArr, closes, last),
         classifyStochRsi(stochResult.k, stochResult.d, rsiArr, last, closes),
         classifyRsiObos(rsiArr, last, closes),
-        classifyCanslim(sma50Arr, rsiArr, volAvg20, volumes, highs, closes, last),
+        classifyCanslim(sma50Arr, rsiArr, volAvg20, volumes, highs, closes, last, entryPriceMap.get(row.symbol) ?? null),
         classifyDualMom(sma200Arr, macdResult.macdLine, highs, closes, last),
         classifySupertrend(stResult.supertrend, stResult.direction, closes, last),
       ];

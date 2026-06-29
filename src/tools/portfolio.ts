@@ -200,6 +200,14 @@ export async function showPositionsHandler(
 
     const netQty = totalBuyQty - totalSellQty;
     const avgBuyPrice = totalBuyQty > 0 ? totalBuyCost / totalBuyQty : 0;
+    // Realized P&L is booked ONLY on the matched (closed) round-trip quantity, so a phantom/duplicate
+    // sell can never add revenue with no offsetting buy cost. Identical to the old math for cleanly-closed
+    // positions (matchedQty === buyQty === sellQty there); only the over-sold cases change.
+    const avgSellPrice = totalSellQty > 0 ? totalSellRevenue / totalSellQty : 0;
+    const matchedQty = Math.min(totalBuyQty, totalSellQty);
+    const matchedCost = avgBuyPrice * matchedQty;
+    const cappedRealizedPnl = totalBuyQty > 0 ? matchedQty * (avgSellPrice - avgBuyPrice) : null;
+    const cappedPnlPct = (cappedRealizedPnl != null && matchedCost > 0) ? (cappedRealizedPnl / matchedCost) * 100 : null;
 
     if (netQty > 0) {
       // Broker breakdown: qty held per broker (buys minus sells, attributed per broker)
@@ -238,8 +246,8 @@ export async function showPositionsHandler(
         symbol,
         total_buy_cost: Math.round(totalBuyCost * 100) / 100,
         total_sell_revenue: Math.round(totalSellRevenue * 100) / 100,
-        realized_pnl: Math.round((totalSellRevenue - totalBuyCost) * 100) / 100,
-        pnl_pct: totalBuyCost > 0 ? Math.round(((totalSellRevenue - totalBuyCost) / totalBuyCost) * 10000) / 100 : 0,
+        realized_pnl: cappedRealizedPnl != null ? Math.round(cappedRealizedPnl * 100) / 100 : null,
+        pnl_pct: cappedPnlPct != null ? Math.round(cappedPnlPct * 100) / 100 : 0,
         portfolio: data.portfolio,
         signal_strategy: data.signal_strategy,
         signal_fingerprint: fingerprints,
@@ -254,10 +262,8 @@ export async function showPositionsHandler(
         symbol,
         total_buy_cost: Math.round(totalBuyCost * 100) / 100,
         total_sell_revenue: Math.round(totalSellRevenue * 100) / 100,
-        realized_pnl: totalBuyQty > 0
-          ? Math.round((totalSellRevenue - totalBuyCost) * 100) / 100
-          : null, // P&L unknown — buy cost missing
-        pnl_pct: null,
+        realized_pnl: cappedRealizedPnl != null ? Math.round(cappedRealizedPnl * 100) / 100 : null, // capped at matched qty; null when buy cost unknown
+        pnl_pct: cappedPnlPct != null ? Math.round(cappedPnlPct * 100) / 100 : null,
         portfolio: data.portfolio,
         signal_strategy: data.signal_strategy,
         signal_fingerprint: fingerprints,
@@ -268,7 +274,7 @@ export async function showPositionsHandler(
 
   // Summary
   const totalInvested = openPositions.reduce((s, p) => s + p.total_invested, 0);
-  const totalRealizedPnl = closedPositions.reduce((s, p) => s + p.realized_pnl, 0)
+  const totalRealizedPnl = closedPositions.reduce((s, p) => s + (p.realized_pnl || 0), 0)
     + openPositions.reduce((s, p) => s + p.partial_realized_pnl, 0);
 
   const result: any = {
@@ -277,8 +283,9 @@ export async function showPositionsHandler(
       closed_positions: closedPositions.length,
       total_invested: Math.round(totalInvested * 100) / 100,
       total_realized_pnl: Math.round(totalRealizedPnl * 100) / 100,
-      wins: closedPositions.filter(p => p.realized_pnl > 0).length,
-      losses: closedPositions.filter(p => p.realized_pnl <= 0).length,
+      wins: closedPositions.filter(p => p.realized_pnl != null && p.realized_pnl > 0).length,
+      losses: closedPositions.filter(p => p.realized_pnl != null && p.realized_pnl <= 0).length,
+      unknown_pnl: closedPositions.filter(p => p.realized_pnl == null).length,
     },
     open_positions: openPositions,
   };
@@ -440,8 +447,11 @@ export async function importTradesHandler(
         continue;
       }
 
-      // Duplicate detection: same symbol + action + price + quantity + trade_date
-      const existing = [...agent.sql`SELECT id FROM positions WHERE symbol = ${t.symbol} AND action = ${t.action.toUpperCase()} AND price = ${t.price} AND quantity = ${t.quantity} AND trade_date = ${t.trade_date}`];
+      // Duplicate detection: same symbol + action + price + quantity within a ±3-day window.
+      // The same fill arrives from the contract note and the API stamped with dates ~1 day apart;
+      // matching on an exact trade_date let both insert. The window stops that double-count while still
+      // allowing genuinely separate same-price/qty trades that are more than 3 days apart.
+      const existing = [...agent.sql`SELECT id FROM positions WHERE symbol = ${t.symbol} AND action = ${t.action.toUpperCase()} AND price = ${t.price} AND quantity = ${t.quantity} AND ABS(julianday(trade_date) - julianday(${t.trade_date})) <= 3`];
       if (existing.length > 0) {
         skipped++;
         continue;
@@ -518,13 +528,17 @@ export async function strategyPortfolioHandler(
         brokers: [...new Set(data.buys.map((b: any) => b.broker))],
       });
     } else {
-      const pnl = totalSellRevenue - totalBuyCost;
+      // Cap realized P&L at the matched round-trip quantity so duplicate/phantom sells can't inflate it.
+      const avgSellPrice = totalSellQty > 0 ? totalSellRevenue / totalSellQty : 0;
+      const matchedQty = Math.min(totalBuyQty, totalSellQty);
+      const matchedCost = avgBuyPrice * matchedQty;
+      const pnl = totalBuyQty > 0 ? matchedQty * (avgSellPrice - avgBuyPrice) : null;
       closedPositions.push({
         symbol,
         total_buy_cost: Math.round(totalBuyCost * 100) / 100,
         total_sell_revenue: Math.round(totalSellRevenue * 100) / 100,
-        realized_pnl: Math.round(pnl * 100) / 100,
-        pnl_pct: totalBuyCost > 0 ? Math.round((pnl / totalBuyCost) * 10000) / 100 : 0,
+        realized_pnl: pnl != null ? Math.round(pnl * 100) / 100 : null,
+        pnl_pct: (pnl != null && matchedCost > 0) ? Math.round((pnl / matchedCost) * 10000) / 100 : 0,
         strategies: [...new Set(data.buys.map((b: any) => b.signal_strategy).filter(Boolean))],
       });
     }
@@ -536,13 +550,13 @@ export async function strategyPortfolioHandler(
     for (const strat of cp.strategies) {
       if (!strategyStats[strat]) strategyStats[strat] = { trades: 0, wins: 0, pnl: 0 };
       strategyStats[strat].trades++;
-      strategyStats[strat].pnl += cp.realized_pnl;
-      if (cp.realized_pnl > 0) strategyStats[strat].wins++;
+      strategyStats[strat].pnl += (cp.realized_pnl || 0);
+      if (cp.realized_pnl != null && cp.realized_pnl > 0) strategyStats[strat].wins++;
     }
   }
 
   const totalInvested = openPositions.reduce((s, p) => s + p.total_invested, 0);
-  const totalRealizedPnl = closedPositions.reduce((s, p) => s + p.realized_pnl, 0);
+  const totalRealizedPnl = closedPositions.reduce((s, p) => s + (p.realized_pnl || 0), 0);
 
   return {
     content: [{
