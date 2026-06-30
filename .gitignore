@@ -173,6 +173,9 @@ wrangler.toml.bak
 scripts/credentials.json
 scripts/token.json
 
+# Local sync runtime state (cursors/timestamps written by sync_server.py)
+scripts/.sync_state.json
+
 # Large data files
 backtester/scripts/candles_2012/
 backtester/scripts/results/

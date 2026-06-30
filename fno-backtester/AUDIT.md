@@ -1,5 +1,31 @@
 # F&O Backtester — Honest Audit Report
 
+> ## 2026 UPDATE — which numbers the app actually shows, and how honest they are
+>
+> This document below describes the **synthetic** (Black-Scholes-from-spot) TS engine. The numbers shown
+> on the live **F&O Signals** tab do **NOT** come from that engine — they come from the **real-data Python
+> pipeline** (`scripts/rerun-3yr-skill.py`) running against `data/nifty-options-history.db` (4.4M real
+> option candles, 2016-2026). That pipeline uses **real historical premiums**, genuine OTM strikes,
+> transaction costs (₹30/leg) + 0.5% slippage, and a **walk-forward train(2023-24)/validate(2025) split**.
+> So the live numbers are real-data-derived, not synthetic fiction.
+>
+> **Honest re-run result (2023-25), which is what the live tab now reflects:**
+> | Strategy | Full 3yr | Out-of-sample 2025 | Verdict |
+> |---|---|---|---|
+> | Short Straddle (ATM) | +8.5% | **+12.7% (holds up)** | The only one whose edge survives unseen data. Modest, ~49 trades. |
+> | Deep OTM Sell | +30% | **+3% (edge weakened)** | High in-sample, collapses out-of-sample. The old UI "+64%" was stale/optimistic. |
+> | Short Strangle (500pt) | +28% | **+2.7% (edge weakened)** | Collapses OOS; 90% WR is a tail-risk red flag. |
+>
+> **Remaining honest caveats (real data, but still):** fills use a single daily (mostly 15:30 close)
+> price, so intraday stop-losses are not tested and losses are understated; there is no margin model, so
+> "% return on ₹5L" overstates what a margin-blocked account would feel; `backtest-real-data.py`'s
+> `backtest-results.json` (+445%) is an overfit best-of-324-combos with no out-of-sample split — ignore it.
+>
+> **Fixes applied 2026-06-29:** added transaction costs to `backtest-real-data.py` (was zero); removed a
+> hindsight ×1.5 P&L fabrication in `optimize-deep-otm.py` Test 7; fixed the live scanner's BANKNIFTY
+> strike rounding (was 50, now 100); corrected the deep-OTM strike inversion / lot size in the unused
+> synthetic TS engine.
+
 ## What was tested
 - 12 years of **real** Nifty spot data (2013-2025, 3,033 trading days from Upstox API)
 - 10 positional strategies + 2 intraday (not tested — need 1-min data)

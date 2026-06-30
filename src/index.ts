@@ -441,7 +441,10 @@ export class MyMCP extends McpAgent {
 						let maxPutOI = 0, maxPutOIStrike = 0;
 						let atmIV = 0;
 						const ivs: number[] = [];
-						let atmStrike = Math.round(spotPrice / 50) * 50;
+						// BANKNIFTY strikes sit on a 100-pt grid, NIFTY on 50. Rounding both to 50 made BANKNIFTY
+						// land on non-existent strikes, so chain lookups silently failed (no signal).
+						const strikeStep = underlying === "BANKNIFTY" ? 100 : 50;
+						let atmStrike = Math.round(spotPrice / strikeStep) * strikeStep;
 
 						// Max pain calculation
 						const strikes: Array<{ strike: number; callOI: number; putOI: number; callIV: number; putIV: number; callPrice: number; putPrice: number }> = [];
@@ -546,7 +549,7 @@ export class MyMCP extends McpAgent {
 										target: `Per-leg: book when premium drops 30% (CE→₹${(cePrem*0.7).toFixed(0)}, PE→₹${(pePrem*0.7).toFixed(0)})`,
 										sl: `Per-leg: cut when premium rises 30% (CE→₹${(cePrem*1.3).toFixed(0)}, PE→₹${(pePrem*1.3).toFixed(0)})`,
 										exitRule: `Square off ALL legs 2 days before ${expiry}. If one leg SLs, other stays open.`,
-										backtest: "3yr: +64%, 71% WR, 8.7% DD, 500 trades, 11/12 quarters profitable",
+										backtest: "Real data 2023-25: +30% full, but out-of-sample 2025 only +3% (edge weakened on unseen data). 76% WR, 11% DD, 170 trades, 11/12 qtrs +ve. Daily-close fills, not margin-adjusted — research, not a forecast.",
 									});
 								}
 							}
@@ -568,7 +571,7 @@ export class MyMCP extends McpAgent {
 										target: `Combined drops 20% → book at ₹${(totalPrem * 0.8).toFixed(0)}`,
 										sl: `Combined rises 30% → exit at ₹${(totalPrem * 1.3).toFixed(0)}`,
 										exitRule: `Square off 2 days before ${expiry}. Both legs as one.`,
-										backtest: "3yr: +8.5%, 74% WR, 1.3% DD, OOS +12.7%",
+										backtest: "Real data 2023-25: +8.5% full, out-of-sample 2025 +12.7% (holds up on unseen data — the most robust of the lot). 74% WR, 1.3% DD, ~49 trades. Daily-close fills, not margin-adjusted.",
 									});
 								}
 							}

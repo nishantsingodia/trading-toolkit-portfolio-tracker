@@ -374,7 +374,7 @@ export type Underlying = "NIFTY" | "BANKNIFTY";
 
 export const LOT_SIZES: Record<Underlying, number> = {
   NIFTY: 75,
-  BANKNIFTY: 30,
+  BANKNIFTY: 35, // SEBI revised BANKNIFTY lot to 35 (Nov 2024); 30 was never a valid NSE value
 };
 
 export const STRIKE_INTERVALS: Record<Underlying, number> = {

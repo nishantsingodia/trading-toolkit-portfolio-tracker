@@ -340,9 +340,10 @@ function deepOtmSell(
         const currentPrem = ceQ.price + peQ.price;
         const decayPct = ((openPos.entryPrem - currentPrem) / openPos.entryPrem) * 100;
 
-        // Danger: spot getting close to either strike
-        const ceDanger = spot <= openPos.ceStrike + dangerBufferPts;
-        const peDanger = spot >= openPos.peStrike - dangerBufferPts;
+        // Danger: spot getting close to either (now correctly-OTM) strike.
+        // CE is above spot → danger when spot rises toward it; PE is below spot → danger when spot falls toward it.
+        const ceDanger = spot >= openPos.ceStrike - dangerBufferPts;
+        const peDanger = spot <= openPos.peStrike + dangerBufferPts;
         // SL: premium doubled
         const slHit = currentPrem >= openPos.entryPrem * stopLossMultiplier;
 
@@ -357,10 +358,11 @@ function deepOtmSell(
 
     if (dte < entryDteMin || dte > entryDteMax) continue;
 
-    // CE strike = spot - otmDistance (deep OTM call, below spot)
-    // PE strike = spot + otmDistance (deep OTM put, above spot)
-    const ceStrike = getATMStrike(spot - otmDistance, underlying);
-    const peStrike = getATMStrike(spot + otmDistance, underlying);
+    // CE strike = spot + otmDistance (deep OTM call, ABOVE spot)
+    // PE strike = spot - otmDistance (deep OTM put, BELOW spot)
+    // (was inverted: spot-dist for CE / spot+dist for PE sold deep ITM options instead of OTM)
+    const ceStrike = getATMStrike(spot + otmDistance, underlying);
+    const peStrike = getATMStrike(spot - otmDistance, underlying);
 
     const ceQ = chain.strikes.get(ceStrike)?.ce;
     const peQ = chain.strikes.get(peStrike)?.pe;

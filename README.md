@@ -4,11 +4,15 @@
 
 A personal trading-research toolkit for the Indian market, built end-to-end by a product leader who wanted to understand the domain by building it rather than reading about it.
 
-> ⚠️ **Not financial advice.** This is an **educational and personal-research** project. Signals are illustrative and backtest results are an explicit work-in-progress (see [Honest scope & caveats](#honest-scope--caveats). Trading involves substantial risk of loss. You are solely responsible for any decisions made with this software. Provided "as is", no warranty — see [LICENSE](LICENSE).
+> ⚠️ **Not financial advice.** This is an **educational and personal-research** project. Signals are illustrative and backtest results are an explicit work-in-progress (see [Honest scope & caveats](#honest-scope--caveats)). Trading involves substantial risk of loss. You are solely responsible for any decisions made with this software. Provided "as is", no warranty — see [LICENSE](LICENSE).
 
 **Signal Scanner** — 6 strategies scored across the Indian Stock Market universe, ranked by cross-strategy consensus:
 
 ![Signal Scanner — 6 equity strategies scored across the NSE universe, ranked by consensus](img/scanner.png)
+
+**Portfolio Tracker** — every position and its P&L bucketed by the strategy that triggered the entry, so you can see how each strategy's book is actually performing:
+
+![Portfolio tracker — positions and P&L bucketed by the originating strategy](img/portfolio.png)
 
 ---
 

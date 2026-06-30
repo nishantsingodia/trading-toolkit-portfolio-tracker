@@ -430,6 +430,10 @@ def run_backtest(ds, strategy_name, entry_fn, params, from_date, to_date):
                     else:
                         pnl += (price - leg["entry_price"]) * LOT_SIZE
 
+                # Transaction costs: brokerage + STT + exchange + SEBI + GST, ~Rs 30 per leg round-trip.
+                # Previously omitted entirely, which overstated every number in backtest-results.json.
+                pnl -= len(pos["legs"]) * 30
+
                 trades.append({
                     "entry_date": pos["entry_date"],
                     "exit_date": date,

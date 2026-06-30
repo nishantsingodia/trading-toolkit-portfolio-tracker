@@ -528,14 +528,12 @@ def main():
     all_t = []; prof = 0
     for _, f, t in PERIODS:
         trades = run_basic(ds, f, t, otm_ce=500, otm_pe=500, target_pct=40, sl_pct=50, exit_dte=2, dte_min=7, dte_max=14, min_prem=20)
-        # Scale COVID/high-VIX trades by 2x
-        for tr in trades:
-            if "2020" in f or "2019" in f:  # high VIX periods
-                tr["pnl"] *= 1.5  # 1.5x (not full 2x due to margin)
+        # REMOVED: this previously multiplied 2019/2020 P&L by 1.5x — a hindsight fabrication that
+        # inflated the two known-best years with no matching margin or risk. Report unscaled actuals only.
         if metrics(trades)["pnl"] > 0: prof += 1
         all_t.extend(trades)
     m = metrics(all_t); m["prof"] = prof
-    print(f"  1x normal + 1.5x high-VIX: {m['n']} trades, +{m['ret']}%, {m['wr']}% WR, {m['dd']}% DD, {m['prof']}/7")
+    print(f"  Fixed 1-lot (no hindsight VIX scaling): {m['n']} trades, +{m['ret']}%, {m['wr']}% WR, {m['dd']}% DD, {m['prof']}/7")
 
     # ══════════════════════════════════════════════════════════════════
     # TEST 8: Minimum Premium Filter
