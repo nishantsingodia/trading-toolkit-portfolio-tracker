@@ -1320,6 +1320,30 @@ function entryBadge(s) {
   return `<span class="signal sm BUY" title="Entered via ${s.entry_strategy}">${short}</span>`;
 }
 
+// Broker(s) currently holding this stock — stacked under the entry badge in the Entry cell.
+// NOT a new column: the scanner table is already full viewport width (would push the ▼ off-screen).
+// Each broker gets its own brand colour so they're distinguishable at a glance.
+const BROKER_COLORS = {
+  UPSTOX:  { fg: '#b794f6', bd: '#7c3aed', bg: 'rgba(124,58,237,0.16)' },  // violet
+  ZERODHA: { fg: '#5aa9ff', bd: '#387ed1', bg: 'rgba(56,126,209,0.16)' },  // kite blue
+  GROWW:   { fg: '#34d399', bd: '#00b386', bg: 'rgba(0,208,156,0.16)' },   // groww green
+  SAHI:    { fg: '#fbbf24', bd: '#d97706', bg: 'rgba(245,158,11,0.16)' },  // amber
+};
+function brokerColor(b) {
+  if (BROKER_COLORS[b]) return BROKER_COLORS[b];
+  // Stable fallback for any other broker: hash name → hue
+  let h = 0;
+  for (let i = 0; i < b.length; i++) h = (h * 31 + b.charCodeAt(i)) % 360;
+  return { fg: `hsl(${h},70%,72%)`, bd: `hsl(${h},60%,45%)`, bg: `hsla(${h},60%,45%,0.16)` };
+}
+function brokerBadge(s) {
+  if (!s.invested || !s.brokers || s.brokers.length === 0) return '';
+  return s.brokers.map(b => {
+    const c = brokerColor(b);
+    return `<span title="Held in ${b}" style="font-size:8px;padding:1px 4px;border-radius:3px;background:${c.bg};color:${c.fg};border:1px solid ${c.bd};white-space:nowrap">${b}</span>`;
+  }).join(' ');
+}
+
 function consensusBadge(s) {
   const bc = s.buy_count || 0;
   // Only count SELL if you hold the stock
@@ -1388,7 +1412,7 @@ function renderScan() {
 
     html += `<td>${fmt(s.ltp)}</td>
       <td>${fmt(s.correction_from_52w_high_pct)}%</td>
-      <td>${entryBadge(s)}</td>
+      <td><div style="display:flex;flex-direction:column;gap:2px;align-items:flex-start">${entryBadge(s)}${brokerBadge(s)}</div></td>
       <td><button class="btn-icon" onclick="toggleExpand('${s.symbol}')" title="Details" style="font-size:12px">▼</button></td>
     </tr>`;
 

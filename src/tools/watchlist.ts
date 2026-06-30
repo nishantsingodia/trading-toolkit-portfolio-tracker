@@ -256,6 +256,7 @@ interface StockResult {
   entry_strategy: string | null;
   entry_portfolio: string | null;
   entry_fingerprints: string[] | null;
+  brokers: string[] | null;
   strategies: StrategySignal[];
   buy_count: number;
   sell_count: number;
@@ -1068,6 +1069,16 @@ export async function scanWatchlistHandler(
     const posRows = [...agent.sql`SELECT symbol, SUM(CASE WHEN action='BUY' THEN quantity ELSE -quantity END) as net_qty FROM positions GROUP BY symbol HAVING net_qty > 0`];
     const invested = new Set((posRows as any[]).map((r: any) => r.symbol));
 
+    // Which broker(s) currently hold each stock — net qty > 0 per (symbol, broker).
+    // Feeds the broker badge stacked in the scanner's Entry cell. MANUAL is dropped (mirrors the trade-history badge).
+    const brokerRows = [...agent.sql`SELECT symbol, broker, SUM(CASE WHEN action='BUY' THEN quantity ELSE -quantity END) as net_qty FROM positions GROUP BY symbol, broker HAVING net_qty > 0`];
+    const brokerMap = new Map<string, string[]>();
+    for (const r of brokerRows as any[]) {
+      if (!r.broker || r.broker === 'MANUAL') continue;
+      if (!brokerMap.has(r.symbol)) brokerMap.set(r.symbol, []);
+      brokerMap.get(r.symbol)!.push(r.broker);
+    }
+
     // Weighted-avg entry price for currently-held stocks → feeds the CANSLIM -8% protective stop.
     // Only held stocks (net_qty > 0) get an entry price; everything else passes null (no stop).
     const entryPriceRows = [...agent.sql`SELECT symbol,
@@ -1191,6 +1202,7 @@ export async function scanWatchlistHandler(
         entry_strategy: entryStratMap.get(row.symbol)?.strategy || null,
         entry_portfolio: entryStratMap.get(row.symbol)?.portfolio || (invested.has(row.symbol) ? 'LEGACY' : null),
         entry_fingerprints: allFpMap.get(row.symbol) || null,
+        brokers: brokerMap.get(row.symbol) || null,
         strategies,
         buy_count: buyCount,
         sell_count: sellCount,
