@@ -809,9 +809,30 @@ tr:hover td { background: rgba(255,255,255,0.02); }
 
     <div class="stats-bar" id="portStats"></div>
 
+    <!-- Recent trades (last 2 trading days) — most immediately useful, shown first -->
+    <div class="table-wrap" style="margin-bottom: 20px;">
+      <div class="table-header" style="display:flex;justify-content:space-between;align-items:center">
+        <h3 id="recentTradesTitle">Recent Trades</h3>
+        <button class="btn sm" id="toggleHistoryBtn" onclick="toggleTradeHistory()" style="font-size:11px">View full history ▾</button>
+      </div>
+      <div class="table-scroll" id="recentTradesBody">
+        <div class="loading-overlay"><div class="spinner"></div> Loading...</div>
+      </div>
+    </div>
+
+    <!-- Full trade history — hidden until "View full history" -->
+    <div class="table-wrap" id="tradeHistoryWrap" style="margin-bottom: 20px; display:none;">
+      <div class="table-header">
+        <h3>Full Trade History</h3>
+      </div>
+      <div class="table-scroll" id="tradeHistoryBody">
+        <div class="loading-overlay"><div class="spinner"></div> Loading...</div>
+      </div>
+    </div>
+
     <div class="table-wrap" style="margin-bottom: 20px;">
       <div class="table-header">
-        <h3 id="portOpenTitle">Open Positions</h3>
+        <h3 id="portOpenTitle">Active Positions</h3>
       </div>
       <div class="table-scroll" id="portOpenBody">
         <div class="loading-overlay"><div class="spinner"></div> Loading positions...</div>
@@ -823,15 +844,6 @@ tr:hover td { background: rgba(255,255,255,0.02); }
         <h3>Closed Positions</h3>
       </div>
       <div class="table-scroll" id="portClosedBody">
-        <div class="loading-overlay"><div class="spinner"></div> Loading...</div>
-      </div>
-    </div>
-
-    <div class="table-wrap" style="margin-top: 20px;">
-      <div class="table-header">
-        <h3>Trade History</h3>
-      </div>
-      <div class="table-scroll" id="tradeHistoryBody">
         <div class="loading-overlay"><div class="spinner"></div> Loading...</div>
       </div>
     </div>
@@ -1344,6 +1356,56 @@ function brokerBadge(s) {
   }).join(' ');
 }
 
+// Portfolio open positions carry brokers as {broker, qty} objects (vs the scanner's string list).
+function positionBrokerBadges(brokers) {
+  if (!brokers || brokers.length === 0) return '<span style="color:var(--text2)">—</span>';
+  return brokers.map(b => {
+    const c = brokerColor(b.broker);
+    return `<span title="${b.qty} held in ${b.broker}" style="font-size:9px;padding:1px 5px;border-radius:3px;background:${c.bg};color:${c.fg};border:1px solid ${c.bd};white-space:nowrap">${b.broker}${b.qty ? ' ' + b.qty : ''}</span>`;
+  }).join(' ');
+}
+
+// One coloured broker chip for a raw trade row.
+function tradeBrokerBadge(broker) {
+  if (!broker) return '';
+  const c = brokerColor(broker);
+  return `<span style="font-size:10px;padding:1px 5px;border-radius:3px;background:${c.bg};color:${c.fg};border:1px solid ${c.bd}">${broker}</span>`;
+}
+
+function toggleTradeHistory() {
+  const wrap = document.getElementById('tradeHistoryWrap');
+  const btn = document.getElementById('toggleHistoryBtn');
+  if (!wrap) return;
+  const showing = wrap.style.display !== 'none';
+  wrap.style.display = showing ? 'none' : '';
+  if (btn) btn.textContent = showing ? 'View full history ▾' : 'Hide full history ▴';
+}
+
+// Shared renderer for both the "recent trades" and "full history" tables.
+function renderTradesTable(trades) {
+  if (!trades || trades.length === 0) return '<div class="loading-overlay">No trades in this range.</div>';
+  let html = `<table>
+    <thead><tr><th>ID</th><th>Date</th><th>Symbol</th><th>Action</th><th>Price</th><th>Qty</th><th>Value</th><th>Broker</th><th>Strategy</th><th></th></tr></thead><tbody>`;
+  for (const t of trades) {
+    const actionClass = t.action === 'BUY' ? 'pnl-positive' : 'pnl-negative';
+    const stratBadge = t.signal_strategy ? `<span style="font-size:10px;padding:1px 5px;border-radius:3px;background:var(--blue-bg);color:var(--blue)">${t.signal_strategy}</span>` : '';
+    html += `<tr>
+      <td style="color:var(--text2)">#${t.id}</td>
+      <td>${t.trade_date}</td>
+      <td><strong>${t.symbol}</strong></td>
+      <td class="${actionClass}" style="font-weight:600">${t.action}</td>
+      <td>${fmt(t.price)}</td>
+      <td>${t.quantity}</td>
+      <td>${fmt(t.price * t.quantity)}</td>
+      <td>${tradeBrokerBadge(t.broker)}</td>
+      <td>${stratBadge}</td>
+      <td><button class="btn-icon" onclick='openEditTdeModal(${JSON.stringify(t)})' title="Edit" style="font-size:14px;margin-right:4px">&#9998;</button></td>
+    </tr>`;
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
 function consensusBadge(s) {
   const bc = s.buy_count || 0;
   // Only count SELL if you hold the stock
@@ -1821,7 +1883,7 @@ function renderPositions() {
     let totalInvested = 0;
 
     let html = `<table>
-      <thead><tr><th>Symbol</th><th>Qty</th><th>Avg Buy</th><th>LTP</th><th>Invested</th><th>Current Value</th><th>Unrealized P&L</th><th>P&L %</th><th>Portfolio</th><th>Strategy</th></tr></thead><tbody>`;
+      <thead><tr><th>Symbol</th><th>Qty</th><th>Broker</th><th>Avg Buy</th><th>LTP</th><th>Invested</th><th>Current Value</th><th>Unrealized P&L</th><th>P&L %</th><th>Portfolio</th><th>Strategy</th></tr></thead><tbody>`;
     for (const p of open) {
       const ltp = ltpMap[p.symbol] || 0;
       const currentValue = ltp > 0 ? ltp * p.net_quantity : 0;
@@ -1891,6 +1953,7 @@ function renderPositions() {
       html += `<tr>
         <td><strong>${p.symbol}</strong></td>
         <td>${p.net_quantity}</td>
+        <td>${positionBrokerBadges(p.brokers)}</td>
         <td>₹${p.avg_buy_price.toFixed(2)}</td>
         <td>${ltpDisplay}</td>
         <td>${fmt(p.total_invested)}</td>
@@ -1901,7 +1964,7 @@ function renderPositions() {
         <td>${stratBadge}${expandBtn}</td>
       </tr>`;
       if (hasFingerprint) {
-        html += `<tr id="${rowId}" style="display:none"><td colspan="10" style="padding:6px 12px;background:var(--bg2);border-left:3px solid var(--blue)">
+        html += `<tr id="${rowId}" style="display:none"><td colspan="11" style="padding:6px 12px;background:var(--bg2);border-left:3px solid var(--blue)">
           <div style="font-size:10px;color:var(--text2);margin-bottom:4px;font-weight:600">Entry Signal Fingerprint</div>
           ${fpHtml}
         </td></tr>`;
@@ -1953,34 +2016,21 @@ function renderPositions() {
     document.getElementById('portClosedBody').innerHTML = html;
   }
 
-  // Trade history
+  // Trades — recent (last 2 trading days present in the log) at top; full history behind "View full history".
+  const recentDates = [...new Set(tradeHistory.map(t => t.trade_date))].sort().slice(-2);
+  const recentTrades = tradeHistory.filter(t => recentDates.includes(t.trade_date));
+  const rtTitle = document.getElementById('recentTradesTitle');
+  const recentEl = document.getElementById('recentTradesBody');
   if (tradeHistory.length === 0) {
-    document.getElementById('tradeHistoryBody').innerHTML = '<div class="loading-overlay">No trades recorded yet.</div>';
+    if (rtTitle) rtTitle.textContent = 'Recent Trades';
+    recentEl.innerHTML = '<div class="loading-overlay">No trades recorded yet.</div>';
   } else {
-    let html = `<table>
-      <thead><tr><th>ID</th><th>Date</th><th>Symbol</th><th>Action</th><th>Price</th><th>Qty</th><th>Value</th><th>Broker</th><th>Strategy</th><th></th></tr></thead><tbody>`;
-    for (const t of tradeHistory) {
-      const actionClass = t.action === 'BUY' ? 'pnl-positive' : 'pnl-negative';
-      const brokerBadge = t.broker && t.broker !== 'MANUAL' ? `<span style="font-size:10px;padding:1px 5px;border-radius:3px;background:var(--surface2);color:var(--text2)">${t.broker}</span>` : '';
-      const stratBadge = t.signal_strategy ? `<span style="font-size:10px;padding:1px 5px;border-radius:3px;background:var(--blue-bg);color:var(--blue)">${t.signal_strategy}</span>` : '';
-      html += `<tr>
-        <td style="color:var(--text2)">#${t.id}</td>
-        <td>${t.trade_date}</td>
-        <td><strong>${t.symbol}</strong></td>
-        <td class="${actionClass}" style="font-weight:600">${t.action}</td>
-        <td>${fmt(t.price)}</td>
-        <td>${t.quantity}</td>
-        <td>${fmt(t.price * t.quantity)}</td>
-        <td>${brokerBadge}</td>
-        <td>${stratBadge}</td>
-        <td>
-          <button class="btn-icon" onclick='openEditTdeModal(${JSON.stringify(t)})' title="Edit" style="font-size:14px;margin-right:4px">&#9998;</button>
-        </td>
-      </tr>`;
-    }
-    html += '</tbody></table>';
-    document.getElementById('tradeHistoryBody').innerHTML = html;
+    if (rtTitle) rtTitle.textContent = `Recent Trades (${recentDates.join(', ')})`;
+    recentEl.innerHTML = renderTradesTable(recentTrades);
   }
+  document.getElementById('tradeHistoryBody').innerHTML = tradeHistory.length === 0
+    ? '<div class="loading-overlay">No trades recorded yet.</div>'
+    : renderTradesTable(tradeHistory);
 }
 
 function openTradeModal() {
