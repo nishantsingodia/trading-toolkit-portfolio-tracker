@@ -1048,6 +1048,28 @@ async function getSmartCandles(
   return { candles: historicalCandles, source, hasIntraday };
 }
 
+// ─── Corporate-action guard ───
+// Demergers are NOT back-adjusted by the historical feed and show up as an impossible single-session gap
+// (a real NSE equity can't move >25% in one day — circuit limits cap it). Indicators computed across such
+// a price cliff produce false signals — e.g. a demerged stock (VEDL -65%, TMPV -40%) looks crashed, so
+// price falls "below the lower Bollinger Band" and RSI tanks → a fake oversold BUY. Return the series from
+// the most recent such gap onward so indicators only see the clean post-action regime. Splits/bonuses are
+// already adjusted upstream and stay well under the threshold. Freshly-demerged names end up with <60
+// clean candles and are skipped by the guard below (emitting no signal beats emitting a wrong one).
+const CORP_ACTION_GAP_THRESHOLD = 0.25;
+function stripPreCorpActionCandles(
+  candles: Array<[string, number, number, number, number, number, number]>
+): Array<[string, number, number, number, number, number, number]> {
+  let cutIdx = 0;
+  for (let i = 1; i < candles.length; i++) {
+    const prevClose = candles[i - 1][4];
+    if (prevClose > 0 && Math.abs(candles[i][4] - prevClose) / prevClose > CORP_ACTION_GAP_THRESHOLD) {
+      cutIdx = i; // keep from the gap day (the new, post-action price level) onward
+    }
+  }
+  return cutIdx > 0 ? candles.slice(cutIdx) : candles;
+}
+
 // ─── Main Scanner Handler ───
 
 export async function scanWatchlistHandler(
@@ -1136,13 +1158,18 @@ export async function scanWatchlistHandler(
       for (let j = 0; j < batch.length; j++) {
         const row = batch[j];
         const result = candleResults[j];
-        const rawCandles = result?.candles;
+        let rawCandles = result?.candles;
 
         if (result) {
           if (result.source === "cache") cacheHits++;
           else apiFetches++;
           // Intraday is counted separately in Phase 2 below
         }
+
+      // Corporate-action guard: drop history before an unadjusted demerger gap (see helper above).
+      if (rawCandles && rawCandles.length > 1) {
+        rawCandles = stripPreCorpActionCandles(rawCandles);
+      }
 
       if (!rawCandles || rawCandles.length < 60) {
         const reason = !result ? "getSmartCandles returned null" : `only ${rawCandles?.length ?? 0} candles`;
@@ -1404,8 +1431,10 @@ export async function backfillSnapshotsHandler(
           continue; // not enough history for indicators
         }
 
-        // Build arrays like scanWatchlistHandler does
-        const rawCandles = candles.map((c: any) => [c.trade_date, c.open, c.high, c.low, c.close, c.volume, c.oi || 0]);
+        // Build arrays like scanWatchlistHandler does (+ same corporate-action guard as the live scan)
+        const rawCandlesRaw = candles.map((c: any) => [c.trade_date, c.open, c.high, c.low, c.close, c.volume, c.oi || 0]);
+        const rawCandles = stripPreCorpActionCandles(rawCandlesRaw as any);
+        if (rawCandles.length < 60) { dateSkipped++; continue; }
         const closes = rawCandles.map(c => c[4]);
         const highs = rawCandles.map(c => c[2]);
         const lows = rawCandles.map(c => c[3]);
