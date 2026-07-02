@@ -584,8 +584,10 @@ export async function autoTagStrategyHandler(
   env: Env,
   agent: SqlAgent
 ): Promise<ToolResponse> {
-  // Get all LEGACY equity trades (exclude OPTIDX, NIFTY options etc.)
-  const trades = [...agent.sql`SELECT id, symbol, action, price, quantity, trade_date, portfolio FROM positions WHERE portfolio = 'LEGACY'`] as any[];
+  // Get all LEGACY equity trades (exclude OPTIDX, NIFTY options etc.).
+  // Skip rows the user tagged by hand (manual_tag=1) — otherwise a manual STRATEGY→LEGACY move gets
+  // silently reverted to STRATEGY on the next sync whenever the stock still shows a bullish signal.
+  const trades = [...agent.sql`SELECT id, symbol, action, price, quantity, trade_date, portfolio FROM positions WHERE portfolio = 'LEGACY' AND manual_tag = 0`] as any[];
 
   let tagged = 0;
   const taggedList: any[] = [];

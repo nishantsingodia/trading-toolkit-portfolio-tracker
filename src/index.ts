@@ -280,7 +280,7 @@ export class MyMCP extends McpAgent {
 				if (url.pathname === "/api/trades/portfolio" && request.method === "PUT") {
 					const body = await request.json() as { id: number; portfolio: string };
 					if (!body.id || !body.portfolio) return json({ error: "Missing id or portfolio" });
-					(this as any).sql`UPDATE positions SET portfolio = ${body.portfolio}, signal_strategy = NULL WHERE id = ${body.id}`;
+					(this as any).sql`UPDATE positions SET portfolio = ${body.portfolio}, signal_strategy = NULL, manual_tag = 1 WHERE id = ${body.id}`;
 					return json({ updated: body.id, portfolio: body.portfolio });
 				}
 
@@ -709,9 +709,9 @@ export class MyMCP extends McpAgent {
 					const { id, portfolio, signal_strategy } = body;
 					if (!id || !portfolio) return json({ error: "Missing id and portfolio" });
 					if (signal_strategy !== undefined) {
-						(this as any).sql`UPDATE positions SET portfolio = ${portfolio}, signal_strategy = ${signal_strategy} WHERE id = ${id}`;
+						(this as any).sql`UPDATE positions SET portfolio = ${portfolio}, signal_strategy = ${signal_strategy}, manual_tag = 1 WHERE id = ${id}`;
 					} else {
-						(this as any).sql`UPDATE positions SET portfolio = ${portfolio} WHERE id = ${id}`;
+						(this as any).sql`UPDATE positions SET portfolio = ${portfolio}, manual_tag = 1 WHERE id = ${id}`;
 					}
 					return json({ success: true });
 				}
@@ -721,7 +721,8 @@ export class MyMCP extends McpAgent {
 					const body = await request.json() as any;
 					const { symbol, portfolio } = body;
 					if (!symbol || !portfolio) return json({ error: "Missing symbol and portfolio" });
-					(this as any).sql`UPDATE positions SET portfolio = ${portfolio} WHERE symbol = ${symbol}`;
+					// manual_tag=1 marks this as a deliberate user choice so auto-tag (run on every sync) won't override it.
+					(this as any).sql`UPDATE positions SET portfolio = ${portfolio}, manual_tag = 1 WHERE symbol = ${symbol}`;
 					return json({ success: true });
 				}
 
