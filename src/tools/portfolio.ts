@@ -26,6 +26,27 @@ export interface RecordTradeArgs {
   broker?: string;
 }
 
+/**
+ * Which strategies actually fired a BUY (FRESH_BUY or RECENT_BUY) at ENTRY, read from the buy-date
+ * signal_fingerprint (format "BB_RSI:FRESH_BUY* | STOCH_RSI:BULLISH | ..."). A trailing "*" marks a buy
+ * signal; a bare BULLISH/BEARISH/NEUTRAL is a holding state, not an entry trigger, so it is NOT credited.
+ * This is the buy-date-accurate answer to "which strategy bought this", replacing the old attribution
+ * that matched a months-old holding against the live (today's) scan.
+ */
+export function strategiesFromFingerprint(fp: string | null | undefined): string[] {
+  if (!fp) return [];
+  const set = new Set<string>();
+  for (const entry of fp.split(" || ")) {      // a multi-buy position joins entries with " || "
+    for (const part of entry.split(" | ")) {    // each part is "NAME:SIGNAL" with "*" appended on a buy
+      if (part.includes("*")) {
+        const name = part.split(":")[0].trim();
+        if (name) set.add(name);
+      }
+    }
+  }
+  return [...set];
+}
+
 export async function recordTradeHandler(
   args: RecordTradeArgs,
   env: Env,
@@ -498,7 +519,7 @@ export async function strategyPortfolioHandler(
   agent: SqlAgent
 ): Promise<ToolResponse> {
   // Get all strategy trades
-  const trades = [...agent.sql`SELECT id, symbol, action, price, quantity, trade_date, broker, signal_strategy FROM positions WHERE portfolio = 'STRATEGY' ORDER BY trade_date, id`] as any[];
+  const trades = [...agent.sql`SELECT id, symbol, action, price, quantity, trade_date, broker, signal_strategy, signal_fingerprint FROM positions WHERE portfolio = 'STRATEGY' ORDER BY trade_date, id`] as any[];
 
   // Aggregate by symbol
   const symbolMap: Record<string, { buys: any[]; sells: any[] }> = {};
@@ -524,7 +545,7 @@ export async function strategyPortfolioHandler(
         symbol, net_quantity: netQty,
         avg_buy_price: Math.round(avgBuyPrice * 100) / 100,
         total_invested: Math.round(avgBuyPrice * netQty * 100) / 100,
-        strategies: [...new Set(data.buys.map((b: any) => b.signal_strategy).filter(Boolean))],
+        strategies: [...new Set(data.buys.flatMap((b: any) => strategiesFromFingerprint(b.signal_fingerprint)))],
         brokers: [...new Set(data.buys.map((b: any) => b.broker))],
       });
     } else {
@@ -539,7 +560,7 @@ export async function strategyPortfolioHandler(
         total_sell_revenue: Math.round(totalSellRevenue * 100) / 100,
         realized_pnl: pnl != null ? Math.round(pnl * 100) / 100 : null,
         pnl_pct: (pnl != null && matchedCost > 0) ? Math.round((pnl / matchedCost) * 10000) / 100 : 0,
-        strategies: [...new Set(data.buys.map((b: any) => b.signal_strategy).filter(Boolean))],
+        strategies: [...new Set(data.buys.flatMap((b: any) => strategiesFromFingerprint(b.signal_fingerprint)))],
       });
     }
   }
@@ -557,6 +578,9 @@ export async function strategyPortfolioHandler(
 
   const totalInvested = openPositions.reduce((s, p) => s + p.total_invested, 0);
   const totalRealizedPnl = closedPositions.reduce((s, p) => s + (p.realized_pnl || 0), 0);
+  // Closed positions whose buys carry no buy-date fingerprint (e.g. bought before scan-snapshot history)
+  // can't be attributed and are intentionally excluded from strategy_breakdown rather than guessed.
+  const unattributedClosed = closedPositions.filter((cp: any) => cp.strategies.length === 0).length;
 
   return {
     content: [{
@@ -568,7 +592,9 @@ export async function strategyPortfolioHandler(
           total_invested: Math.round(totalInvested * 100) / 100,
           total_realized_pnl: Math.round(totalRealizedPnl * 100) / 100,
           total_trades: trades.length,
+          unattributed_closed: unattributedClosed,
         },
+        attribution_note: "Per-strategy P&L is CREDIT-ALL: each trade is credited to every strategy that fired a fresh/recent BUY on its entry date (derived from signal_fingerprint). Strategies overlap, so strategy_breakdown P&L will NOT sum to total_realized_pnl — read it as a per-strategy hit-rate lens, not a ledger. Trades with no buy-date snapshot are unattributed (see unattributed_closed) and excluded.",
         strategy_breakdown: strategyStats,
         open_positions: openPositions,
         closed_positions: closedPositions,
@@ -584,10 +610,10 @@ export async function autoTagStrategyHandler(
   env: Env,
   agent: SqlAgent
 ): Promise<ToolResponse> {
-  // Get all LEGACY equity trades (exclude OPTIDX, NIFTY options etc.).
-  // Skip rows the user tagged by hand (manual_tag=1) — otherwise a manual STRATEGY→LEGACY move gets
-  // silently reverted to STRATEGY on the next sync whenever the stock still shows a bullish signal.
-  const trades = [...agent.sql`SELECT id, symbol, action, price, quantity, trade_date, portfolio FROM positions WHERE portfolio = 'LEGACY' AND manual_tag = 0`] as any[];
+  // Promote LEGACY holdings to STRATEGY based on the ACTUAL buy-date signal (the stored fingerprint),
+  // NOT today's live scan — a months-old holding must be judged by the conditions on its entry date.
+  // Only BUY rows; skip anything the user hand-tagged (manual_tag=1) so manual moves are never reverted.
+  const trades = [...agent.sql`SELECT id, symbol, signal_fingerprint FROM positions WHERE portfolio = 'LEGACY' AND manual_tag = 0 AND action = 'BUY'`] as any[];
 
   let tagged = 0;
   const taggedList: any[] = [];
@@ -600,45 +626,15 @@ export async function autoTagStrategyHandler(
       continue;
     }
 
-    // Clean symbol — remove exchange suffixes like "-EQ/INE..." or "-FEDERAL"
-    let cleanSym = sym.split('-')[0].split('/')[0].trim();
-    // Handle SAHI format like "FEDERALBNK-FEDERAL" → "FEDERALBNK"
-    if (cleanSym.includes('FEDERALBNK')) cleanSym = 'FEDERALBNK';
-    if (cleanSym.includes('HINDPETRO')) cleanSym = 'HINDPETRO';
-    if (cleanSym.includes('BPCL')) cleanSym = 'BPCL';
-    if (cleanSym.includes('BSE')) cleanSym = 'BSE';
+    // Which strategies fired a FRESH/RECENT buy on this trade's OWN buy date?
+    const fired = strategiesFromFingerprint(trade.signal_fingerprint);
+    if (fired.length === 0) continue; // not bought on a signal (or no snapshot at entry) → stays LEGACY
 
-    // Check if this stock has any signal in scan_results
-    const stockSignal = args.scan_results.find((s: any) =>
-      s.symbol.toUpperCase() === cleanSym
-    );
-
-    if (!stockSignal) continue;
-
-    // Check if any strategy had a matching signal on this date
-    const strategies = stockSignal.strategies || [];
-    const matchingStrategy = strategies.find((st: any) => {
-      const sig = st.signal || '';
-      if (trade.action === 'BUY' && (sig.includes('BUY') || sig === 'BULLISH')) return true;
-      if (trade.action === 'SELL' && (sig.includes('SELL') || sig === 'BEARISH')) return true;
-      return false;
-    });
-
-    if (matchingStrategy) {
-      // Only auto-tag BUY trades as STRATEGY (SELL trades stay LEGACY —
-      // you can't enter a short position, so SELL is just exiting a holding)
-      if (trade.action === 'BUY') {
-        agent.sql`UPDATE positions SET portfolio = 'STRATEGY', signal_strategy = ${matchingStrategy.strategy} WHERE id = ${trade.id}`;
-        tagged++;
-        taggedList.push({
-          id: trade.id,
-          symbol: cleanSym,
-          action: trade.action,
-          strategy: matchingStrategy.strategy,
-          signal: matchingStrategy.signal,
-        });
-      }
-    }
+    // Credit every strategy that fired at entry (comma-joined). The P&L breakdown re-derives the same
+    // set from the fingerprint, so this flat field is now just for display/consistency.
+    agent.sql`UPDATE positions SET portfolio = 'STRATEGY', signal_strategy = ${fired.join(',')} WHERE id = ${trade.id}`;
+    tagged++;
+    taggedList.push({ id: trade.id, symbol: sym, strategies: fired });
   }
 
   return {
