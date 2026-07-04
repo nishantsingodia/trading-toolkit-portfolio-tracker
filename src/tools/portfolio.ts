@@ -27,6 +27,36 @@ export interface RecordTradeArgs {
 }
 
 /**
+ * Broker contract notes spell some stocks differently than the scanner tracks them
+ * (e.g. "TATA STL" vs "TATASTEEL"). This maps the broker spelling to the scanner's canonical
+ * symbol so the entry-signal lookup can find the right scan snapshot. Only verified, in-universe
+ * mappings — ETFs/bonds/untracked names are intentionally omitted (they have no signal to attribute).
+ * Extend this over time as new broker spellings appear.
+ */
+const SYMBOL_ALIASES: Record<string, string> = {
+  "AXIS BANK": "AXISBANK",
+  "BAJAJ AUTO": "BAJAJ-AUTO",
+  "DIVI~S LAB": "DIVISLAB",
+  "DLF LTD": "DLF",
+  "HDFC BANK": "HDFCBANK",
+  "HDFC BANK LT": "HDFCBANK",
+  "HINDALCO IN": "HINDALCO",
+  "L&T": "LT",
+  "MUTHOOT": "MUTHOOTFIN",
+  "TATA CONSUMER": "TATACONSUM",
+  "TATA STL": "TATASTEEL",
+  "TUBE INVEST": "TIINDIA",
+  "NIPPONAMC -": "NAM-INDIA",
+  "SILVERBEES-E": "SILVERBEES",
+};
+
+/** Resolve a broker-spelled symbol to the scanner's canonical symbol (identity if not aliased). */
+export function canonicalSymbol(sym: string): string {
+  if (!sym) return sym;
+  return SYMBOL_ALIASES[sym] ?? SYMBOL_ALIASES[sym.trim()] ?? sym;
+}
+
+/**
  * Which strategies actually fired a BUY (FRESH_BUY or RECENT_BUY) at ENTRY, read from the buy-date
  * signal_fingerprint (format "BB_RSI:FRESH_BUY* | STOCH_RSI:BULLISH | ..."). A trailing "*" marks a buy
  * signal; a bare BULLISH/BEARISH/NEUTRAL is a holding state, not an entry trigger, so it is NOT credited.
@@ -80,7 +110,7 @@ export async function recordTradeHandler(
     // scan that ran at/before market close (15:30 IST). This avoids crediting a post-close/evening scan
     // that ran after the buy (look-ahead). scan_time is stored in IST.
     const snapRows = [...agent.sql`SELECT fingerprint FROM scan_snapshots
-      WHERE symbol = ${args.symbol}
+      WHERE symbol = ${canonicalSymbol(args.symbol)}
         AND (scan_date < ${tradeDate} OR (scan_date = ${tradeDate} AND scan_time <= '15:30:00'))
       ORDER BY scan_date DESC, scan_time DESC LIMIT 1`];
     if (snapRows.length > 0) {
@@ -494,7 +524,7 @@ export async function importTradesHandler(
       if (t.action.toUpperCase() === 'BUY') {
         // Same market-close cap as recordTrade: never attribute to a scan that ran after the buy.
         const snapRows = [...agent.sql`SELECT fingerprint FROM scan_snapshots
-          WHERE symbol = ${t.symbol}
+          WHERE symbol = ${canonicalSymbol(t.symbol)}
             AND (scan_date < ${t.trade_date} OR (scan_date = ${t.trade_date} AND scan_time <= '15:30:00'))
           ORDER BY scan_date DESC, scan_time DESC LIMIT 1`];
         if (snapRows.length > 0) {
