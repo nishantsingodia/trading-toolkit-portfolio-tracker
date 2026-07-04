@@ -625,10 +625,13 @@ export async function autoTagStrategyHandler(
   const taggedList: any[] = [];
 
   for (const trade of trades) {
-    // Skip F&O trades (options, futures)
+    // Skip only genuine F&O rows: options END in strike+CE/PE (a digit precedes), index/futures formats.
+    // NOT equities that merely contain "PE"/"CE" in the name (PERSISTENT, CEATLTD, HINDPETRO, PETRONET…),
+    // which the old substring check wrongly excluded — leaving them stuck in LEGACY. Mirrors importTrades.
     const sym = trade.symbol.toUpperCase();
-    if (sym.includes('OPTIDX') || sym.includes('NIFTY') || sym.includes('BANKNIFTY') ||
-        sym.includes('PE') || sym.includes('CE') || sym.includes('FUT')) {
+    if (sym.startsWith('OPTIDX') || sym.startsWith('FUTIDX') ||
+        /NIFTY\d{2}/.test(sym) || /BANKNIFTY\d{2}/.test(sym) ||
+        (sym.endsWith('CE') && /\d/.test(sym)) || (sym.endsWith('PE') && /\d/.test(sym))) {
       continue;
     }
 
