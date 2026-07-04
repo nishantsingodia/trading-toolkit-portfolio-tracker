@@ -286,13 +286,10 @@ export class MyMCP extends McpAgent {
 
 				// POST /api/trades/auto-tag — match trades against scanner signals
 				if (url.pathname === "/api/trades/auto-tag" && request.method === "POST") {
-					// Run scanner first to get current signals
-					const scanResult = await scanWatchlistHandler({ category: "ALL" }, activeEnv, this as any);
-					const scanText = scanResult?.content?.[0]?.text;
-					const scanData = scanText ? JSON.parse(scanText) : {};
-					const stocks = scanData.stocks || [];
-
-					const result = await autoTagStrategyHandler({ scan_results: stocks }, activeEnv, this as any);
+					// Attribution now reads each trade's stored BUY-DATE fingerprint (see autoTagStrategyHandler),
+					// so we no longer run a live scan here. This keeps Sync fast, avoids a token-dependent ~90s
+					// scan, and stops Sync from writing post-market snapshots that could look ahead of a buy.
+					const result = await autoTagStrategyHandler({ scan_results: [] }, activeEnv, this as any);
 					return json(extractText(result));
 				}
 

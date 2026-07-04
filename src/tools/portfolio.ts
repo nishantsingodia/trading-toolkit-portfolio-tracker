@@ -76,8 +76,12 @@ export async function recordTradeHandler(
   // Auto-stamp fingerprint from nearest scan snapshot for BUY trades
   let fingerprint: string | null = null;
   if (args.action === "BUY") {
+    // Attribute to the last scan the owner could have seen BEFORE buying: any earlier day, or a same-day
+    // scan that ran at/before market close (15:30 IST). This avoids crediting a post-close/evening scan
+    // that ran after the buy (look-ahead). scan_time is stored in IST.
     const snapRows = [...agent.sql`SELECT fingerprint FROM scan_snapshots
-      WHERE symbol = ${args.symbol} AND scan_date <= ${tradeDate}
+      WHERE symbol = ${args.symbol}
+        AND (scan_date < ${tradeDate} OR (scan_date = ${tradeDate} AND scan_time <= '15:30:00'))
       ORDER BY scan_date DESC, scan_time DESC LIMIT 1`];
     if (snapRows.length > 0) {
       fingerprint = (snapRows[0] as any).fingerprint;
@@ -488,8 +492,10 @@ export async function importTradesHandler(
 
       // Auto-stamp fingerprint from nearest scan snapshot for BUY trades
       if (t.action.toUpperCase() === 'BUY') {
+        // Same market-close cap as recordTrade: never attribute to a scan that ran after the buy.
         const snapRows = [...agent.sql`SELECT fingerprint FROM scan_snapshots
-          WHERE symbol = ${t.symbol} AND scan_date <= ${t.trade_date}
+          WHERE symbol = ${t.symbol}
+            AND (scan_date < ${t.trade_date} OR (scan_date = ${t.trade_date} AND scan_time <= '15:30:00'))
           ORDER BY scan_date DESC, scan_time DESC LIMIT 1`];
         if (snapRows.length > 0) {
           agent.sql`UPDATE positions SET signal_fingerprint = ${(snapRows[0] as any).fingerprint}
