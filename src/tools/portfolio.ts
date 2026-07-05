@@ -554,15 +554,23 @@ export async function strategyPortfolioHandler(
   env: Env,
   agent: SqlAgent
 ): Promise<ToolResponse> {
-  // Get all strategy trades
-  const trades = [...agent.sql`SELECT id, symbol, action, price, quantity, trade_date, broker, signal_strategy, signal_fingerprint FROM positions WHERE portfolio = 'STRATEGY' ORDER BY trade_date, id`] as any[];
+  // Strategy ENTRIES = buys tagged into the STRATEGY bucket.
+  const trades = [...agent.sql`SELECT id, symbol, action, price, quantity, trade_date, broker, signal_strategy, signal_fingerprint FROM positions WHERE portfolio = 'STRATEGY' AND action = 'BUY' ORDER BY trade_date, id`] as any[];
 
-  // Aggregate by symbol
+  // Aggregate strategy buys by symbol
   const symbolMap: Record<string, { buys: any[]; sells: any[] }> = {};
   for (const t of trades) {
     if (!symbolMap[t.symbol]) symbolMap[t.symbol] = { buys: [], sells: [] };
-    if (t.action === 'BUY') symbolMap[t.symbol].buys.push(t);
-    else symbolMap[t.symbol].sells.push(t);
+    symbolMap[t.symbol].buys.push(t);
+  }
+
+  // Attach the stock's ACTUAL sells from ANY bucket. A sell still CLOSES a strategy position even though
+  // sells aren't signal entries (they default to LEGACY). Without this, a strategy stock sold without a
+  // signal looked permanently OPEN and its realized P&L was never counted under the strategy. Matched
+  // quantity is capped at the strategy-bought qty below, so sells beyond it (a legacy lot) don't inflate.
+  const allSells = [...agent.sql`SELECT symbol, price, quantity FROM positions WHERE action = 'SELL'`] as any[];
+  for (const s of allSells) {
+    if (symbolMap[s.symbol]) symbolMap[s.symbol].sells.push(s);
   }
 
   const openPositions: any[] = [];
@@ -585,15 +593,17 @@ export async function strategyPortfolioHandler(
         brokers: [...new Set(data.buys.map((b: any) => b.broker))],
       });
     } else {
-      // Cap realized P&L at the matched round-trip quantity so duplicate/phantom sells can't inflate it.
+      // Realize P&L on the matched round-trip quantity only (min of strategy-bought and sold), so a
+      // partial/over sell can't inflate it. Sells beyond the strategy quantity belong to a legacy lot.
       const avgSellPrice = totalSellQty > 0 ? totalSellRevenue / totalSellQty : 0;
       const matchedQty = Math.min(totalBuyQty, totalSellQty);
       const matchedCost = avgBuyPrice * matchedQty;
-      const pnl = totalBuyQty > 0 ? matchedQty * (avgSellPrice - avgBuyPrice) : null;
+      const matchedRevenue = avgSellPrice * matchedQty;
+      const pnl = totalBuyQty > 0 ? matchedRevenue - matchedCost : null;
       closedPositions.push({
         symbol,
-        total_buy_cost: Math.round(totalBuyCost * 100) / 100,
-        total_sell_revenue: Math.round(totalSellRevenue * 100) / 100,
+        total_buy_cost: Math.round(matchedCost * 100) / 100,
+        total_sell_revenue: Math.round(matchedRevenue * 100) / 100,
         realized_pnl: pnl != null ? Math.round(pnl * 100) / 100 : null,
         pnl_pct: (pnl != null && matchedCost > 0) ? Math.round((pnl / matchedCost) * 10000) / 100 : 0,
         strategies: [...new Set(data.buys.flatMap((b: any) => strategiesFromFingerprint(b.signal_fingerprint)))],
