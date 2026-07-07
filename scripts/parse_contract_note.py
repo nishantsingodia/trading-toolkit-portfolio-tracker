@@ -12,8 +12,23 @@ SAHI: Summary tables on Page 1 (same format)
 import pdfplumber
 import re
 import os
+import json
 from typing import List, Dict, Optional, Union
 from datetime import datetime
+
+# ── ISIN → canonical NSE ticker (from src/data/stock-master.ts, the 250-stock universe) ──
+# Broker notes print inconsistent company names ("TATA STL", "Jio Financial Services Limited") but carry
+# a stable ISIN in column 0. Resolving by ISIN is unambiguous and fixes name-fragmentation at the source.
+_ISIN_MAP: Dict[str, str] = {}
+try:
+    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "isin_to_symbol.json")) as _f:
+        _ISIN_MAP = json.load(_f)
+except Exception:
+    _ISIN_MAP = {}
+
+def resolve_symbol(isin: str, name: str) -> str:
+    """Prefer the canonical ticker resolved from the ISIN; fall back to the printed name if unknown."""
+    return _ISIN_MAP.get((isin or "").strip()) or (name or "").strip()
 
 
 # ── Trade Classes ────────────────────────────────────────────────────
@@ -268,17 +283,22 @@ def parse_equity_table(table: list, trade_date: str, broker: str) -> List[Trade]
 
         # Split multi-value cells
         symbols = raw_symbol.split("\n")
+        isins = str(row[0] or "").split("\n")   # col 0 = ISIN (stable id → resolved to canonical ticker)
         buy_qtys = str(row[buy_qty_idx] or "0").split("\n") if buy_qty_idx < len(row) else ["0"]
         buy_prices = str(row[buy_price_idx] or "0").split("\n") if buy_price_idx < len(row) else ["0"]
         sell_qtys = str(row[sell_qty_idx] or "0").split("\n") if sell_qty_idx < len(row) else ["0"]
         sell_prices = str(row[sell_price_idx] or "0").split("\n") if sell_price_idx < len(row) else ["0"]
 
-        for i, symbol in enumerate(symbols):
-            symbol = symbol.strip()
-            if not symbol or len(symbol) < 2:
+        for i, name in enumerate(symbols):
+            name = name.strip()
+            if not name or len(name) < 2:
                 continue
-            if symbol.lower() in ("security name", "symbol", "total", "net"):
+            if name.lower() in ("security name", "symbol", "total", "net"):
                 continue
+
+            # Resolve the printed company name to a canonical NSE ticker via its ISIN (col 0).
+            isin = isins[i].strip() if i < len(isins) else ""
+            symbol = resolve_symbol(isin, name)
 
             bq = safe_int(buy_qtys[i] if i < len(buy_qtys) else "0")
             bp = safe_float(buy_prices[i] if i < len(buy_prices) else "0")
