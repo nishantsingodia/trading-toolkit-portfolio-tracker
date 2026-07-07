@@ -99,6 +99,10 @@ def fetch_contract_notes_from_gmail(service, broker: str, days: int = 3):
         query = "from:no-reply@sahi.com subject:Digital Contract Note has:attachment"
     elif broker == "UPSTOX":
         query = "from:upstox subject:Digital Contract Note has:attachment"
+    elif broker == "INDMONEY":
+        # INDmoney (INDstocks) emails one password-protected PDF contract note per trade day.
+        # Subject: "Contract Note from INDmoney for trades on DD/MM/YYYY". Exclude their MTF/margin statements.
+        query = 'from:statements@transactions.indmoney.com subject:"Contract Note" has:attachment'
     else:
         return []
 
@@ -441,10 +445,11 @@ def main():
     parser.add_argument("--zerodha", action="store_true", help="Sync Zerodha only")
     parser.add_argument("--sahi", action="store_true", help="Sync SAHI only")
     parser.add_argument("--upstox", action="store_true", help="Sync Upstox only")
+    parser.add_argument("--indmoney", action="store_true", help="Sync INDmoney only")
     parser.add_argument("--days", type=int, default=3, help="Fetch contract notes from last N days (default: 3)")
     args = parser.parse_args()
 
-    sync_all = not (args.zerodha or args.sahi or args.upstox)
+    sync_all = not (args.zerodha or args.sahi or args.upstox or args.indmoney)
 
     print(f"Trade Sync Pipeline")
     print(f"  Panel: {PANEL_URL}")
@@ -455,7 +460,7 @@ def main():
     state = load_sync_state()
 
     # Gmail-based syncs
-    if sync_all or args.zerodha or args.sahi or args.upstox:
+    if sync_all or args.zerodha or args.sahi or args.upstox or args.indmoney:
         service = get_gmail_service()
         if not service:
             print("Gmail not available. Skipping email-based syncs.")
@@ -466,6 +471,8 @@ def main():
                 sync_broker_from_gmail(service, "SAHI", args.days)
             if sync_all or args.upstox:
                 sync_broker_from_gmail(service, "UPSTOX", args.days)
+            if sync_all or args.indmoney:
+                sync_broker_from_gmail(service, "INDMONEY", args.days)
 
     # Upstox API sync (holdings + today's trades)
     if sync_all or args.upstox:
