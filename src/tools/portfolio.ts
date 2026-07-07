@@ -557,20 +557,24 @@ export async function strategyPortfolioHandler(
   // Strategy ENTRIES = buys tagged into the STRATEGY bucket.
   const trades = [...agent.sql`SELECT id, symbol, action, price, quantity, trade_date, broker, signal_strategy, signal_fingerprint FROM positions WHERE portfolio = 'STRATEGY' AND action = 'BUY' ORDER BY trade_date, id`] as any[];
 
-  // Aggregate strategy buys by symbol
+  // Aggregate strategy buys by CANONICAL symbol, so fragmented spellings unify (e.g. a "HDFC BANK"
+  // buy and a "HDFCBANK" buy land in one bucket, and a "HDFC BANK" sell can close a "HDFCBANK" buy).
   const symbolMap: Record<string, { buys: any[]; sells: any[] }> = {};
   for (const t of trades) {
-    if (!symbolMap[t.symbol]) symbolMap[t.symbol] = { buys: [], sells: [] };
-    symbolMap[t.symbol].buys.push(t);
+    const key = canonicalSymbol(t.symbol);
+    if (!symbolMap[key]) symbolMap[key] = { buys: [], sells: [] };
+    symbolMap[key].buys.push(t);
   }
 
-  // Attach the stock's ACTUAL sells from ANY bucket. A sell still CLOSES a strategy position even though
-  // sells aren't signal entries (they default to LEGACY). Without this, a strategy stock sold without a
-  // signal looked permanently OPEN and its realized P&L was never counted under the strategy. Matched
-  // quantity is capped at the strategy-bought qty below, so sells beyond it (a legacy lot) don't inflate.
+  // Attach the stock's ACTUAL sells from ANY bucket, matched by canonical symbol. A sell still CLOSES a
+  // strategy position even though sells aren't signal entries (they default to LEGACY) — and it closes it
+  // even when the sell is recorded under a different broker spelling than the buy. Without this, a strategy
+  // stock sold without a signal (or under an alias spelling) looked permanently OPEN. Matched quantity is
+  // capped at the strategy-bought qty below, so sells beyond it (a legacy lot) don't inflate.
   const allSells = [...agent.sql`SELECT symbol, price, quantity FROM positions WHERE action = 'SELL'`] as any[];
   for (const s of allSells) {
-    if (symbolMap[s.symbol]) symbolMap[s.symbol].sells.push(s);
+    const key = canonicalSymbol(s.symbol);
+    if (symbolMap[key]) symbolMap[key].sells.push(s);
   }
 
   const openPositions: any[] = [];
