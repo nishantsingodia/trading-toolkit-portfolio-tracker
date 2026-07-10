@@ -655,6 +655,32 @@ export async function strategyPortfolioHandler(
 
 // ─── auto-tag strategy trades ─────────────────────────────────────────────────
 
+/**
+ * Pick whole SELL rows whose quantities sum to `target` (the overflow qty that closed a legacy lot).
+ * Sell rows can't be split (splitting qty would break import de-dup, which matches on qty), so we choose
+ * a subset of rows. Prefers an EXACT subset (so both buckets net cleanly); if none exists, falls back to
+ * oldest-first rows until the cumulative qty reaches the target. `sells` must already be oldest-first.
+ */
+function pickOverflowSells(sells: Array<{ id: number; qty: number }>, target: number): Set<number> {
+  const memo = new Map<string, number[] | null>();
+  const search = (i: number, rem: number): number[] | null => {
+    if (rem === 0) return [];
+    if (i >= sells.length || rem < 0) return null;
+    const k = `${i}:${rem}`;
+    if (memo.has(k)) return memo.get(k)!;
+    const withI = search(i + 1, rem - sells[i].qty);
+    const res = withI ? [sells[i].id, ...withI] : search(i + 1, rem);
+    memo.set(k, res);
+    return res;
+  };
+  const exact = search(0, target);
+  if (exact) return new Set(exact);
+  const out = new Set<number>();
+  let acc = 0;
+  for (const s of sells) { out.add(s.id); acc += s.qty; if (acc >= target) break; }
+  return out;
+}
+
 export async function autoTagStrategyHandler(
   args: { scan_results: any[] },
   env: Env,
@@ -687,13 +713,71 @@ export async function autoTagStrategyHandler(
     // set from the fingerprint, so this flat field is now just for display/consistency.
     agent.sql`UPDATE positions SET portfolio = 'STRATEGY', signal_strategy = ${fired.join(',')} WHERE id = ${trade.id}`;
     tagged++;
-    taggedList.push({ id: trade.id, symbol: sym, strategies: fired });
+    taggedList.push({ id: trade.id, symbol: sym, action: 'BUY', strategies: fired });
   }
 
+  // ─── SELL pass (strategy-priority lot matching) ────────────────────────────────
+  // A SELL that closes a STRATEGY position belongs in STRATEGY too, INHERITING the entry's strategy — we
+  // deliberately do NOT compute a fresh signal for a sell (you don't "buy on a signal" when exiting; just
+  // carry the entry's strategy and close it). Sells fill the STRATEGY lot FIRST; only the OVERFLOW beyond
+  // the strategy-bought qty — shares that must have closed a pre-strategy LEGACY lot — stays LEGACY. This
+  // keeps strategy exits in STRATEGY (a stock's own sells shouldn't scatter across buckets) yet never
+  // strands a legacy lot as phantom-open and never credits STRATEGY beyond the qty it actually bought.
+  // Realized P&L is unaffected either way (strategyPortfolioHandler caps at the matched qty from ANY
+  // bucket); this only fixes the stored row's bucket + Strategy-column label and the portfolio-filtered
+  // position views. manual_tag=1 sells are left untouched so a deliberate hand-move is never reverted.
+  // Build, per canonical symbol, the strategy set AND the total strategy-bought qty (buy pass has run).
+  const stratBuys = [...agent.sql`SELECT symbol, quantity, signal_strategy, signal_fingerprint FROM positions WHERE portfolio = 'STRATEGY' AND action = 'BUY'`] as any[];
+  const symStrats: Record<string, Set<string>> = {};
+  const stratBuyQty: Record<string, number> = {};
+  for (const b of stratBuys) {
+    const key = canonicalSymbol(b.symbol);
+    if (!symStrats[key]) { symStrats[key] = new Set<string>(); stratBuyQty[key] = 0; }
+    stratBuyQty[key] += b.quantity;
+    // Prefer the buy-date fingerprint (authoritative); fall back to the flat signal_strategy field.
+    const fromFp = strategiesFromFingerprint(b.signal_fingerprint);
+    const list = fromFp.length > 0
+      ? fromFp
+      : String(b.signal_strategy || '').split(',').map((s: string) => s.trim()).filter(Boolean);
+    for (const s of list) symStrats[key].add(s);
+  }
+
+  // Non-hand-tagged sells for stocks that have a strategy buy, grouped by canonical symbol, oldest first.
+  const sellRows = [...agent.sql`SELECT id, symbol, quantity, portfolio, signal_strategy FROM positions WHERE action = 'SELL' AND manual_tag = 0 ORDER BY trade_date, id`] as any[];
+  const sellsBySym: Record<string, Array<{ id: number; qty: number; portfolio: string; signal_strategy: string | null }>> = {};
+  for (const s of sellRows) {
+    const key = canonicalSymbol(s.symbol);
+    if (!symStrats[key]) continue; // stock was never a strategy position → genuine legacy sell, leave alone
+    (sellsBySym[key] ||= []).push({ id: s.id, qty: s.quantity, portfolio: s.portfolio, signal_strategy: s.signal_strategy ?? null });
+  }
+
+  let sellsToStrategy = 0;
+  let sellsToLegacy = 0;
+  for (const key of Object.keys(sellsBySym)) {
+    const sells = sellsBySym[key];
+    const totalSell = sells.reduce((a, s) => a + s.qty, 0);
+    const overflow = Math.max(0, totalSell - (stratBuyQty[key] || 0)); // qty that closed a legacy lot
+    const legacyIds = overflow > 0 ? pickOverflowSells(sells, overflow) : new Set<number>();
+    // A STRATEGY buy with no fired-signal fingerprint (e.g. hand-tagged into the bucket) has an empty
+    // strategy set — its sell still belongs in STRATEGY, just with a null label like the buy itself.
+    const label = symStrats[key].size > 0 ? [...symStrats[key]].join(',') : null;
+
+    for (const s of sells) {
+      const toStrategy = !legacyIds.has(s.id);
+      const wantPortfolio = toStrategy ? 'STRATEGY' : 'LEGACY';
+      const wantStrategy = toStrategy ? label : null;
+      if (s.portfolio === wantPortfolio && (s.signal_strategy ?? null) === wantStrategy) continue; // already correct
+      agent.sql`UPDATE positions SET portfolio = ${wantPortfolio}, signal_strategy = ${wantStrategy} WHERE id = ${s.id}`;
+      if (toStrategy) sellsToStrategy++; else sellsToLegacy++;
+      taggedList.push({ id: s.id, symbol: key, action: 'SELL', bucket: wantPortfolio, strategies: toStrategy ? [...symStrats[key]] : [] });
+    }
+  }
+
+  const sellChanges = sellsToStrategy + sellsToLegacy;
   return {
     content: [{
       type: "text",
-      text: JSON.stringify({ tagged, trades: taggedList }, null, 2),
+      text: JSON.stringify({ tagged: tagged + sellChanges, tagged_buys: tagged, sells_to_strategy: sellsToStrategy, sells_to_legacy: sellsToLegacy, trades: taggedList }, null, 2),
     }],
   };
 }
