@@ -48,6 +48,13 @@ const SYMBOL_ALIASES: Record<string, string> = {
   "TUBE INVEST": "TIINDIA",
   "NIPPONAMC -": "NAM-INDIA",
   "SILVERBEES-E": "SILVERBEES",
+  // Broker full-name spellings that split a position across two rows — unify to the NSE ticker so the
+  // same stock's buys/sells net together (e.g. INDmoney "DELTA CORP" vs Zerodha "DELTACORP").
+  "DELTA CORP": "DELTACORP",
+  "Nuvoco Vistas": "NUVOCO",
+  "NUVOCOVISTASCORPORATIONLIMI": "NUVOCO",
+  "HINDUSTAN": "HCC",
+  "HINDUSTANCONSTRUCTIONCO": "HCC",
 };
 
 /** Resolve a broker-spelled symbol to the scanner's canonical symbol (identity if not aliased). */
@@ -208,9 +215,11 @@ export async function showPositionsHandler(
   const rawSymbols = new Set<string>();
   for (const row of tradeRows as any[]) { rawSymbols.add(row.symbol); }
 
-  // For each trade, find the best matching key: exact match first, then normalized
+  // For each trade, find the best matching key: exact match first, then normalized.
+  // canonicalSymbol collapses known broker-spelling aliases (e.g. "DELTA CORP"→"DELTACORP") so a stock
+  // spelled two ways by different brokers nets as one position; it's identity for un-aliased symbols.
   for (const row of tradeRows as any[]) {
-    let sym = row.symbol;
+    let sym = canonicalSymbol(row.symbol);
     // If this exact symbol already has entries, use it
     // If not, check if a normalized version exists (for SELL matching against BUY)
     if (!symbolMap[sym]) {
@@ -509,12 +518,15 @@ export async function importTradesHandler(
         continue;
       }
 
-      // Duplicate detection: same symbol + action + price + quantity within a ±3-day window.
+      // Duplicate detection: same CANONICAL symbol + action + price + quantity within a ±3-day window.
       // The same fill arrives from the contract note and the API stamped with dates ~1 day apart;
       // matching on an exact trade_date let both insert. The window stops that double-count while still
-      // allowing genuinely separate same-price/qty trades that are more than 3 days apart.
-      const existing = [...agent.sql`SELECT id FROM positions WHERE symbol = ${t.symbol} AND action = ${t.action.toUpperCase()} AND price = ${t.price} AND quantity = ${t.quantity} AND ABS(julianday(trade_date) - julianday(${t.trade_date})) <= 3`];
-      if (existing.length > 0) {
+      // allowing genuinely separate same-price/qty trades that are more than 3 days apart. We match on
+      // canonicalSymbol (NOT the raw string) so a broker spelling change (e.g. "DELTACORP"→"DELTA CORP")
+      // can't dodge the check and double-import — that exact gap once created 15 duplicate rows.
+      const canon = canonicalSymbol(t.symbol);
+      const candidates = [...agent.sql`SELECT symbol FROM positions WHERE action = ${t.action.toUpperCase()} AND price = ${t.price} AND quantity = ${t.quantity} AND ABS(julianday(trade_date) - julianday(${t.trade_date})) <= 3`] as any[];
+      if (candidates.some((c) => canonicalSymbol(c.symbol) === canon)) {
         skipped++;
         continue;
       }
