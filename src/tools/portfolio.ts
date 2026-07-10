@@ -520,7 +520,10 @@ export async function importTradesHandler(
       agent.sql`INSERT INTO positions (symbol, action, price, quantity, trade_date, broker, portfolio, source, signal_strategy)
         VALUES (${t.symbol}, ${t.action.toUpperCase()}, ${t.price}, ${t.quantity}, ${t.trade_date}, ${broker}, ${portfolio}, ${source}, ${signalStrategy})`;
 
-      // Auto-stamp fingerprint from nearest scan snapshot for BUY trades
+      // Auto-stamp fingerprint from nearest scan snapshot for BUY trades, and attribute the strategy
+      // INLINE so a synced strategy buy is never momentarily blank. Previously the fingerprint was
+      // stamped here but the STRATEGY bucket + signal_strategy were only filled by the separate auto-tag
+      // pass, so a contract-note buy showed a blank Strategy column in the gap between sync and auto-tag.
       if (t.action.toUpperCase() === 'BUY') {
         // Same market-close cap as recordTrade: never attribute to a scan that ran after the buy.
         const snapRows = [...agent.sql`SELECT fingerprint FROM scan_snapshots
@@ -528,8 +531,18 @@ export async function importTradesHandler(
             AND (scan_date < ${t.trade_date} OR (scan_date = ${t.trade_date} AND scan_time <= '15:30:00'))
           ORDER BY scan_date DESC, scan_time DESC LIMIT 1`];
         if (snapRows.length > 0) {
-          agent.sql`UPDATE positions SET signal_fingerprint = ${(snapRows[0] as any).fingerprint}
+          const fp = (snapRows[0] as any).fingerprint as string;
+          agent.sql`UPDATE positions SET signal_fingerprint = ${fp}
             WHERE symbol = ${t.symbol} AND action = 'BUY' AND trade_date = ${t.trade_date} AND signal_fingerprint IS NULL`;
+          // Promote to STRATEGY with the buy-date strategies (same rule as autoTagStrategyHandler's buy
+          // pass). Skip when the caller explicitly set a portfolio/strategy on the import so an explicit
+          // classification is never overridden; only touch the just-inserted LEGACY/null, non-hand-tagged row.
+          const fired = strategiesFromFingerprint(fp);
+          if (fired.length > 0 && !t.portfolio && !t.signal_strategy) {
+            agent.sql`UPDATE positions SET portfolio = 'STRATEGY', signal_strategy = ${fired.join(',')}
+              WHERE symbol = ${t.symbol} AND action = 'BUY' AND trade_date = ${t.trade_date}
+                AND manual_tag = 0 AND portfolio = 'LEGACY' AND signal_strategy IS NULL`;
+          }
         }
       }
 
