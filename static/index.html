@@ -1862,6 +1862,7 @@ function renderPositions() {
     <div class="stat-card"><div class="label">Open Positions</div><div class="value blue">${s.open_positions || 0}</div></div>
     <div class="stat-card"><div class="label">Total Invested</div><div class="value">${fmt(s.total_invested)}</div></div>
     <div class="stat-card"><div class="label">Realized P&L</div><div class="value ${pnlClass(s.total_realized_pnl)}">${fmt(s.total_realized_pnl)}</div></div>
+    <div class="stat-card"><div class="label">Return (profit/invested)</div><div class="value ${pnlClass(s.realized_return_pct)}">${s.realized_return_pct != null ? s.realized_return_pct.toFixed(2) + '%' : '—'}</div></div>
     <div class="stat-card"><div class="label">Wins / Losses</div><div class="value">${s.wins || 0} / ${s.losses || 0}</div></div>
   `;
 
@@ -1980,6 +1981,7 @@ function renderPositions() {
         <div class="stat-card"><div class="label">Current Value</div><div class="value">${fmt(Math.round(totalCurrentValue))}</div></div>
         <div class="stat-card"><div class="label">Unrealized P&L</div><div class="value ${pnlClass(totalUnrealized)}">${fmt(Math.round(totalUnrealized))} (${(totalUnrealized/totalInvested*100).toFixed(1)}%)</div></div>
         <div class="stat-card"><div class="label">Realized P&L</div><div class="value ${pnlClass(portData.summary?.total_realized_pnl)}">${fmt(portData.summary?.total_realized_pnl)}</div></div>
+        <div class="stat-card"><div class="label">Return (profit/invested)</div><div class="value ${pnlClass(portData.summary?.realized_return_pct)}">${portData.summary?.realized_return_pct != null ? portData.summary.realized_return_pct.toFixed(2) + '%' : '—'}</div></div>
       `;
     }
 

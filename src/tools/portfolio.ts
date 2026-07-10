@@ -331,6 +331,11 @@ export async function showPositionsHandler(
   const totalInvested = openPositions.reduce((s, p) => s + p.total_invested, 0);
   const totalRealizedPnl = closedPositions.reduce((s, p) => s + (p.realized_pnl || 0), 0)
     + openPositions.reduce((s, p) => s + p.partial_realized_pnl, 0);
+  // Realized return = profit on CLOSED round-trips / capital deployed on those round-trips (matched buy
+  // cost). Plain profit-on-invested ratio, NOT annualized. Closed-only so numerator & denominator align.
+  const closedRealizedPnl = closedPositions.reduce((s, p) => s + (p.realized_pnl || 0), 0);
+  const closedInvested = closedPositions.reduce((s, p) => s + (p.total_buy_cost || 0), 0);
+  const realizedReturnPct = closedInvested > 0 ? Math.round((closedRealizedPnl / closedInvested) * 10000) / 100 : null;
 
   const result: any = {
     summary: {
@@ -338,6 +343,8 @@ export async function showPositionsHandler(
       closed_positions: closedPositions.length,
       total_invested: Math.round(totalInvested * 100) / 100,
       total_realized_pnl: Math.round(totalRealizedPnl * 100) / 100,
+      realized_return_pct: realizedReturnPct,
+      total_matched_invested: Math.round(closedInvested * 100) / 100,
       wins: closedPositions.filter(p => p.realized_pnl != null && p.realized_pnl > 0).length,
       losses: closedPositions.filter(p => p.realized_pnl != null && p.realized_pnl <= 0).length,
       unknown_pnl: closedPositions.filter(p => p.realized_pnl == null).length,
@@ -641,6 +648,10 @@ export async function strategyPortfolioHandler(
 
   const totalInvested = openPositions.reduce((s, p) => s + p.total_invested, 0);
   const totalRealizedPnl = closedPositions.reduce((s, p) => s + (p.realized_pnl || 0), 0);
+  // Realized return = total realized profit / capital actually deployed on the closed round-trips
+  // (matched buy cost). NOT annualized — a plain profit-on-invested ratio.
+  const totalMatchedInvested = closedPositions.reduce((s, p) => s + (p.total_buy_cost || 0), 0);
+  const realizedReturnPct = totalMatchedInvested > 0 ? (totalRealizedPnl / totalMatchedInvested) * 100 : null;
   // Closed positions whose buys carry no buy-date fingerprint (e.g. bought before scan-snapshot history)
   // can't be attributed and are intentionally excluded from strategy_breakdown rather than guessed.
   const unattributedClosed = closedPositions.filter((cp: any) => cp.strategies.length === 0).length;
@@ -654,6 +665,8 @@ export async function strategyPortfolioHandler(
           closed_positions: closedPositions.length,
           total_invested: Math.round(totalInvested * 100) / 100,
           total_realized_pnl: Math.round(totalRealizedPnl * 100) / 100,
+          total_matched_invested: Math.round(totalMatchedInvested * 100) / 100,
+          realized_return_pct: realizedReturnPct != null ? Math.round(realizedReturnPct * 100) / 100 : null,
           total_trades: trades.length,
           unattributed_closed: unattributedClosed,
         },
