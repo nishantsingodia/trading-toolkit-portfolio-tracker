@@ -112,8 +112,17 @@ def fetch_contract_notes_from_gmail(service, broker: str, days: int = 3):
 
     print(f"  Searching Gmail: {query}")
 
-    results = service.users().messages().list(userId="me", q=query, maxResults=30).execute()
-    messages = results.get("messages", [])
+    # Paginate through ALL matching emails in the window. Previously capped at maxResults=30 with no
+    # pageToken, so only the 30 most-recent notes per broker were ever seen — older contract notes were
+    # silently missed (causing both missing trades and unreachable fragmented symbols on backfill).
+    messages = []
+    page_token = None
+    while True:
+        resp = service.users().messages().list(userId="me", q=query, maxResults=100, pageToken=page_token).execute()
+        messages.extend(resp.get("messages", []))
+        page_token = resp.get("nextPageToken")
+        if not page_token:
+            break
     print(f"  Found {len(messages)} emails")
 
     pdfs = []
