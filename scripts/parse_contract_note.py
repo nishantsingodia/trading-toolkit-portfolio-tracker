@@ -34,18 +34,20 @@ def resolve_symbol(isin: str, name: str) -> str:
 # ── Trade Classes ────────────────────────────────────────────────────
 
 class Trade:
-    def __init__(self, symbol: str, action: str, quantity: int, price: float, trade_date: str, broker: str):
+    def __init__(self, symbol: str, action: str, quantity: int, price: float, trade_date: str, broker: str, isin: str = ""):
         self.symbol = symbol
         self.action = action
         self.quantity = quantity
         self.price = price
         self.trade_date = trade_date
         self.broker = broker
+        self.isin = isin  # stable identity — the printed name varies per broker; ISIN does not
         self.is_fno = False
 
     def to_dict(self):
         return {"symbol": self.symbol, "action": self.action, "quantity": self.quantity,
-                "price": round(self.price, 2), "trade_date": self.trade_date, "broker": self.broker}
+                "price": round(self.price, 2), "trade_date": self.trade_date, "broker": self.broker,
+                "isin": self.isin}
 
     def __repr__(self):
         return f"{self.action} {self.quantity}x {self.symbol} @ ₹{self.price:.2f} on {self.trade_date} [{self.broker}]"
@@ -306,9 +308,9 @@ def parse_equity_table(table: list, trade_date: str, broker: str) -> List[Trade]
             sp = safe_float(sell_prices[i] if i < len(sell_prices) else "0")
 
             if bq > 0 and bp > 0:
-                trades.append(Trade(symbol, "BUY", bq, bp, trade_date, broker))
+                trades.append(Trade(symbol, "BUY", bq, bp, trade_date, broker, isin))
             if sq > 0 and sp > 0:
-                trades.append(Trade(symbol, "SELL", sq, sp, trade_date, broker))
+                trades.append(Trade(symbol, "SELL", sq, sp, trade_date, broker, isin))
 
     return trades
 

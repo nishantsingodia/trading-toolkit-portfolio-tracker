@@ -106,6 +106,9 @@ export function initWatchlistTables(agent: SqlAgent) {
   const posColCheck = [...agent.sql`PRAGMA table_info(positions)`] as any[];
   const posCols = new Set(posColCheck.map((c: any) => c.name));
   if (!posCols.has('signal_fingerprint')) { agent.sql`ALTER TABLE positions ADD COLUMN signal_fingerprint TEXT`; }
+  // ISIN is the stable, broker-independent identity for a stock (the printed name varies/truncates per
+  // broker, which fragmented positions across spellings). Stored on import for dedup + grouping by ISIN.
+  if (!posCols.has('isin')) { agent.sql`ALTER TABLE positions ADD COLUMN isin TEXT`; }
 
   // Seed watchlist if empty
   const count = [...agent.sql`SELECT COUNT(*) as cnt FROM watchlist`];

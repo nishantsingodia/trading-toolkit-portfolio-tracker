@@ -501,6 +501,7 @@ interface ImportTrade {
   portfolio?: string;
   source?: string;
   signal_strategy?: string;
+  isin?: string;
 }
 
 export async function importTradesHandler(
@@ -523,15 +524,19 @@ export async function importTradesHandler(
         continue;
       }
 
-      // Duplicate detection: same CANONICAL symbol + action + price + quantity within a ±3-day window.
+      // Duplicate detection: same action + price + quantity within a ±3-day window, AND same instrument.
       // The same fill arrives from the contract note and the API stamped with dates ~1 day apart;
       // matching on an exact trade_date let both insert. The window stops that double-count while still
-      // allowing genuinely separate same-price/qty trades that are more than 3 days apart. We match on
-      // canonicalSymbol (NOT the raw string) so a broker spelling change (e.g. "DELTACORP"→"DELTA CORP")
-      // can't dodge the check and double-import — that exact gap once created 15 duplicate rows.
+      // allowing genuinely separate same-price/qty trades that are more than 3 days apart. Instrument
+      // identity prefers ISIN (broker-independent, exact); it falls back to canonicalSymbol so a broker
+      // spelling change (e.g. "DELTACORP"→"DELTA CORP") can't dodge the check — that gap once made 15 dupes.
       const canon = canonicalSymbol(t.symbol);
-      const candidates = [...agent.sql`SELECT symbol FROM positions WHERE action = ${t.action.toUpperCase()} AND price = ${t.price} AND quantity = ${t.quantity} AND ABS(julianday(trade_date) - julianday(${t.trade_date})) <= 3`] as any[];
-      if (candidates.some((c) => canonicalSymbol(c.symbol) === canon)) {
+      const isin = (t.isin || '').trim();
+      const candidates = [...agent.sql`SELECT symbol, isin FROM positions WHERE action = ${t.action.toUpperCase()} AND price = ${t.price} AND quantity = ${t.quantity} AND ABS(julianday(trade_date) - julianday(${t.trade_date})) <= 3`] as any[];
+      const isDup = candidates.some((c) =>
+        (isin && c.isin) ? c.isin === isin : canonicalSymbol(c.symbol) === canon
+      );
+      if (isDup) {
         skipped++;
         continue;
       }
@@ -541,8 +546,8 @@ export async function importTradesHandler(
       const source = t.source || 'CSV';
       const signalStrategy = t.signal_strategy || null;
 
-      agent.sql`INSERT INTO positions (symbol, action, price, quantity, trade_date, broker, portfolio, source, signal_strategy)
-        VALUES (${t.symbol}, ${t.action.toUpperCase()}, ${t.price}, ${t.quantity}, ${t.trade_date}, ${broker}, ${portfolio}, ${source}, ${signalStrategy})`;
+      agent.sql`INSERT INTO positions (symbol, action, price, quantity, trade_date, broker, portfolio, source, signal_strategy, isin)
+        VALUES (${t.symbol}, ${t.action.toUpperCase()}, ${t.price}, ${t.quantity}, ${t.trade_date}, ${broker}, ${portfolio}, ${source}, ${signalStrategy}, ${isin || null})`;
 
       // Auto-stamp fingerprint from nearest scan snapshot for BUY trades, and attribute the strategy
       // INLINE so a synced strategy buy is never momentarily blank. Previously the fingerprint was
