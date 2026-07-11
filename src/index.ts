@@ -723,6 +723,20 @@ export class MyMCP extends McpAgent {
 					return json({ success: true });
 				}
 
+				// POST /api/trades/relabel — bulk re-key rows to a canonical symbol + ISIN (ISIN-reconciliation
+				// backfill). Rename-only (never inserts), so it can't create duplicates. body: {updates:[{id,symbol,isin}]}
+				if (url.pathname === "/api/trades/relabel" && request.method === "POST") {
+					const body = await request.json() as any;
+					const updates = Array.isArray(body.updates) ? body.updates : [];
+					let updated = 0;
+					for (const u of updates) {
+						if (!u || typeof u.id !== "number" || !u.symbol) continue;
+						(this as any).sql`UPDATE positions SET symbol = ${u.symbol}, isin = ${u.isin ?? null} WHERE id = ${u.id}`;
+						updated++;
+					}
+					return json({ success: true, updated });
+				}
+
 				// DELETE /api/fno/positions — Wipe all F&O positions (for re-import)
 				if (url.pathname === "/api/fno/positions" && request.method === "DELETE") {
 					(this as any).sql`DELETE FROM fno_positions`;
