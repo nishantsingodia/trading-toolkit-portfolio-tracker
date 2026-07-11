@@ -55,6 +55,11 @@ const SYMBOL_ALIASES: Record<string, string> = {
   "NUVOCOVISTASCORPORATIONLIMI": "NUVOCO",
   "HINDUSTAN": "HCC",
   "HINDUSTANCONSTRUCTIONCO": "HCC",
+  // Parser truncated-name spellings whose SELL was stranded from a holdings-ticker BUY, verified by
+  // matching qty + broker + consistent price (so they're the same instrument, not a name coincidence).
+  "Davangere Sugar": "DAVANGERE",
+  "EIH ASOCIATI": "EIHAHOTELS",
+  "DEV CRBANK": "DCBBANK",
 };
 
 /** Resolve a broker-spelled symbol to the scanner's canonical symbol (identity if not aliased). */
